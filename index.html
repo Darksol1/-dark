@@ -1,51 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dark PFP Preview</title>
+  <meta charset="UTF-8" />
+  <title>$Dark PFP Generator</title>
   <style>
     body {
-      background-color: #000;  /* Black background */
-      color: #fff;            /* White text for visibility */
+      background-color: #000;
+      color: #fff;
+      text-align: center;
       font-family: Arial, sans-serif;
       margin: 20px;
-      text-align: center;     /* Center all text/elements inside the body */
     }
-    .dark-pfp {
-      filter: brightness(25%);
+    .preview-img {
       width: 150px;
       height: 150px;
       object-fit: cover;
       border-radius: 50%;
       margin-top: 10px;
-    }
-    .logo {
-      margin-bottom: 20px;    /* Adds spacing below the logo */
+      /* 
+        We could still use a CSS filter for on-screen preview, 
+        but the final darkening is handled by canvas. 
+      */
     }
   </style>
 </head>
 <body>
-  <!-- Logo at the top -->
-  <img src="Dark Sol.png" alt="Dark Sol Logo" class="logo" width="150" />
-
+  <img src="your-logo.png" alt="Logo" width="100" />
   <h2>$Dark PFP Generator</h2>
+
   <input type="file" id="upload" accept="image/*" />
-  <br/>
-  <img id="preview" src="https://via.placeholder.com/150" alt="Profile Picture Preview" class="dark-pfp" />
+  <br /><br />
+  
+  <!-- Canvas for processing the image -->
+  <canvas id="canvas" width="150" height="150" style="display: none;"></canvas>
+  
+  <!-- Preview of the processed (darkened) image -->
+  <img id="preview" src="https://via.placeholder.com/150" alt="Preview" class="preview-img" />
+
+  <br /><br />
+  <button id="downloadBtn" style="display: none;">Download Dark Image</button>
 
   <script>
     const uploadInput = document.getElementById('upload');
     const previewImg = document.getElementById('preview');
+    const canvas = document.getElementById('canvas');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    const ctx = canvas.getContext('2d');
+
+    // Factor by which to darken the image (0.25 = 25% brightness)
+    const DARK_FACTOR = 0.25;
 
     uploadInput.addEventListener('change', event => {
       const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = e => {
-          previewImg.src = e.target.result;
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          // Resize the canvas to match the image (or a fixed size if you prefer)
+          canvas.width = 150;
+          canvas.height = 150;
+
+          // Draw the original image onto the canvas
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          // Get the image data from the canvas
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+
+          // Apply darkening by reducing each color channel
+          for (let i = 0; i < data.length; i += 4) {
+            data[i]   = data[i]   * DARK_FACTOR; // R
+            data[i+1] = data[i+1] * DARK_FACTOR; // G
+            data[i+2] = data[i+2] * DARK_FACTOR; // B
+            // data[i+3] is alpha; keep it the same
+          }
+
+          // Put the modified data back on the canvas
+          ctx.putImageData(imageData, 0, 0);
+
+          // Update the preview image to show the darkened result
+          previewImg.src = canvas.toDataURL('image/png');
+
+          // Show the download button
+          downloadBtn.style.display = 'inline-block';
         };
-        reader.readAsDataURL(file);
-      }
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      // Create a temporary link to download the canvas image
+      const link = document.createElement('a');
+      link.download = 'dark-image.png'; // or .jpg if you prefer
+      link.href = canvas.toDataURL('image/png');
+      link.click();
     });
   </script>
 </body>
