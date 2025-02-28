@@ -2,101 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Solana Rug Checker</title>
-  <style>
-    /* Basic reset */
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      background-color: #111;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    header {
-      text-align: center;
-      padding: 40px 20px;
-    }
-    header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      background: linear-gradient(90deg, #28a745, #007bff, #6f42c1);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    header p {
-      font-size: 1.2rem;
-      color: #aaa;
-    }
-    .search-container {
-      background: #222;
-      border-radius: 8px;
-      max-width: 600px;
-      width: 90%;
-      margin: 20px auto;
-      display: flex;
-      overflow: hidden;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    .search-container input[type="text"] {
-      flex-grow: 1;
-      padding: 15px;
-      font-size: 1rem;
-      border: none;
-      outline: none;
-      background: #333;
-      color: #fff;
-    }
-    .search-container button {
-      background: #28a745;
-      border: none;
-      color: #fff;
-      padding: 0 20px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    .search-container button:hover {
-      background: #218838;
-    }
-    /* Responsive spacing */
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 2rem;
-      }
-      header p {
-        font-size: 1rem;
-      }
-    }
-  </style>
 </head>
-<body>
-  <header>
-    <h1>Solana Rug Checker</h1>
-    <p>Check your token for potential rug pulls.</p>
-  </header>
-
-  <div class="search-container">
-    <input type="text" id="tokenAddress" placeholder="Enter token address here" />
+<body style="background:#111; color:#fff; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; padding:20px;">
+  <h1>Solana Rug Checker</h1>
+  <p>Enter a token address below:</p>
+  
+  <div style="display:flex; gap:10px;">
+    <input id="tokenAddress" type="text" placeholder="Enter token address" style="padding:5px;"/>
     <button onclick="checkToken()">Rug Check</button>
   </div>
 
+  <div id="result" style="margin-top:20px;"></div>
+
+  <!-- Include the Solana Web3.js library from a CDN (for quick testing) -->
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+  
   <script>
-    function checkToken() {
+    async function checkToken() {
       const address = document.getElementById('tokenAddress').value.trim();
+      const resultDiv = document.getElementById('result');
+
       if (!address) {
         alert('Please enter a token address!');
         return;
       }
-      // For now, simply display the address.
-      // Here you can add functionality to call an API and fetch token details.
-      alert('Checking token: ' + address);
+
+      // Connect to Solana mainnet-beta
+      const connection = new solanaWeb3.Connection(
+        solanaWeb3.clusterApiUrl('mainnet-beta')
+      );
+
+      try {
+        // Convert user input to a PublicKey
+        const publicKey = new solanaWeb3.PublicKey(address);
+
+        // Fetch basic info about this account
+        const accountInfo = await connection.getParsedAccountInfo(publicKey);
+
+        // If no data is found, inform the user
+        if (!accountInfo.value) {
+          resultDiv.innerText = `No data found for ${address}. Are you sure this is correct?`;
+          return;
+        }
+
+        // Extract some details
+        const data = accountInfo.value.data;
+        const owner = data?.parsed?.info?.owner || 'N/A';
+        const type  = data?.parsed?.type  || 'N/A';
+
+        // Show results
+        resultDiv.innerText = `Owner: ${owner}\nType: ${type}`;
+
+        // Here is where you would add more "rug check" logic,
+        // e.g. checking mint authority, freeze authority, top holders, etc.
+
+      } catch (error) {
+        console.error(error);
+        resultDiv.innerText = 'Error fetching token info. Check console.';
+      }
     }
   </script>
 </body>
