@@ -177,6 +177,13 @@
     td {
       color: #ccc;
     }
+    /* Updated Markets table header to include Price */
+    .markets-panel table th.price {
+      text-align: right;
+    }
+    .markets-panel table td.price {
+      text-align: right;
+    }
     /* Responsive */
     @media(max-width: 800px) {
       .analysis-score {
@@ -248,11 +255,11 @@
           <th>Pair</th>
           <th>LP Mint</th>
           <th>Liquidity</th>
-          <th>LP Locked</th>
+          <th class="price">Price (USDC)</th>
         </tr>
       </thead>
       <tbody id="marketsBody">
-        <!-- Populated by JS -->
+        <!-- Will be populated with real data -->
       </tbody>
     </table>
   </div>
@@ -269,7 +276,7 @@
         </tr>
       </thead>
       <tbody id="holdersBody">
-        <!-- Populated by JS -->
+        <!-- Will be populated with on-chain data -->
       </tbody>
     </table>
   </div>
@@ -280,35 +287,16 @@
 <script>
   // Your Helius RPC Endpoint
   const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
-
-  // Token Program ID (SPL Token)
+  // USDC Mint on Solana (for conversion via Jupiter)
+  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt";
+  // Token Program ID for SPL tokens
   const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 
   let tokenList = [];
   let tokenListLoaded = false;
   let connection;
 
-  // Placeholder markets data (replace with real API calls later)
-  const marketsData = [
-    {
-      market: "Raydium",
-      address: "RaydiumMarketAddr1",
-      pair: "SOL/USDC",
-      lpMint: "LPMint1",
-      liquidity: "$25,000",
-      lpLocked: "100%"
-    },
-    {
-      market: "Orca",
-      address: "OrcaMarketAddr2",
-      pair: "SOL/MEME",
-      lpMint: "LPMint2",
-      liquidity: "$10,000",
-      lpLocked: "100%"
-    }
-  ];
-
-  // Load token list on page load
+  // Placeholder: Load the official Solana token list on page load
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const res = await fetch("https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json");
@@ -319,8 +307,9 @@
     } catch (err) {
       console.error("Error loading token list:", err);
     }
-    // Populate Markets table with placeholder data
-    populateMarketsTable(marketsData);
+    // Populate Markets table with placeholder data for now
+    // (It will be replaced with real data if available)
+    // populateMarketsTable(placeholderMarkets);
   });
 
   async function rugCheck() {
@@ -348,7 +337,6 @@
     try {
       // Look up token info in the token list
       const tokenEntry = tokenList.find(t => t.address === fullAddress);
-
       if (tokenEntry) {
         document.getElementById("tokenName").textContent = tokenEntry.name || "Unknown";
         document.getElementById("tokenLogo").src = tokenEntry.logoURI || "https://via.placeholder.com/48/333/fff?text=No+Logo";
@@ -376,7 +364,7 @@
       let supply = "--";
       let mintAuth = "None";
       let freezeAuth = "None";
-
+      let decimals = 0;
       if (parsedInfo.value && parsedInfo.value.data && parsedInfo.value.data.parsed) {
         const info = parsedInfo.value.data.parsed.info;
         const type = parsedInfo.value.data.parsed.type;
@@ -385,6 +373,7 @@
           supply = info.supply;
           mintAuth = info.mintAuthority || "None";
           freezeAuth = info.freezeAuthority || "None";
+          decimals = info.decimals; // get decimals from mint info
         } else if (type === "account") {
           isTokenAccount = true;
           mintAuth = "(See Mint)";
@@ -396,7 +385,6 @@
           console.log("No data found for", fullAddress);
         }
       }
-
       if (isMint) {
         const tokenSupply = await connection.getTokenSupply(publicKey);
         if (tokenSupply.value) {
@@ -404,6 +392,7 @@
         }
       }
 
+      // Update left panel
       document.getElementById("tokenAddr").textContent = shortenAddress(fullAddress);
       document.getElementById("tokenAddr").title = fullAddress;
       document.getElementById("tokenSupply").textContent = formatNumber(supply);
@@ -422,16 +411,53 @@
       document.getElementById("riskMed").textContent = medCount;
       document.getElementById("riskHigh").textContent = highCount;
 
-      // Fetch and populate Top Holders if it's a mint
-      if (isMint) {
+      // If it's a mint, fetch real market data via Jupiter API and fetch top holders
+      if (isMint && decimals) {
+        // Fetch market data (price quote) from Jupiter
+        const marketData = await fetchMarketData(fullAddress, decimals);
+        if (marketData && marketData.routes && marketData.routes.length > 0) {
+          const route = marketData.routes[0];
+          const inAmount = Number(route.inAmount);
+          const outAmount = Number(route.outAmount);
+          const price = outAmount / inAmount; // USDC per token
+          const marketRow = {
+            market: "Jupiter",
+            address: "Jupiter API",
+            pair: "TOKEN/USDC",
+            lpMint: "N/A",
+            liquidity: "N/A",
+            price: price.toFixed(6)
+          };
+          populateMarketsTable([marketRow]);
+        } else {
+          // No route found; you can optionally display a message
+          populateMarketsTable([]);
+        }
+        // Fetch Top Holders
         const topHolders = await fetchTopHolders(connection, fullAddress);
         populateHoldersTable(topHolders);
       } else {
+        // Not a mint → clear markets and top holders
+        document.getElementById("marketsBody").innerHTML = "";
         document.getElementById("holdersBody").innerHTML = "";
       }
     } catch (err) {
       console.error(err);
       alert("Error fetching token info. Check console.");
+    }
+  }
+
+  // Fetch market data from Jupiter API for a given mint and token decimals
+  async function fetchMarketData(tokenMint, tokenDecimals) {
+    const amount = Math.pow(10, tokenDecimals);
+    const url = `https://quote-api.jup.ag/v1/quote?inputMint=${tokenMint}&outputMint=${USDC_MINT}&amount=${amount}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error("Error fetching market data:", err);
+      return null;
     }
   }
 
@@ -478,10 +504,15 @@
     });
   }
 
-  // Placeholder: Populate Markets table with dummy data
   function populateMarketsTable(markets) {
     const marketsBody = document.getElementById("marketsBody");
     marketsBody.innerHTML = "";
+    if (markets.length === 0) {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td colspan="6" style="text-align:center;">No market data available</td>`;
+      marketsBody.appendChild(row);
+      return;
+    }
     markets.forEach(m => {
       const row = document.createElement("tr");
       row.innerHTML = `
@@ -490,13 +521,13 @@
         <td>${m.pair}</td>
         <td>${m.lpMint}</td>
         <td>${m.liquidity}</td>
-        <td>${m.lpLocked}</td>
+        <td class="price">${m.price}</td>
       `;
       marketsBody.appendChild(row);
     });
   }
 
-  // Score logic (placeholder)
+  // Placeholder scoring logic
   function computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuth, freezeAuth }) {
     let score = 50;
     let statusLabel = "Medium Risk";
@@ -561,6 +592,7 @@
     document.getElementById("riskMed").textContent = "0";
     document.getElementById("riskHigh").textContent = "0";
     document.getElementById("holdersBody").innerHTML = "";
+    document.getElementById("marketsBody").innerHTML = "";
   }
 
   function shortenAddress(addr) {
