@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <title>Solana Rug Checker with RugCheck API</title>
   <style>
+    /* (Your existing CSS styling remains unchanged) */
     body {
-      margin: 0; 
-      padding: 0; 
-      background-color: #0f0f0f; 
+      margin: 0;
+      padding: 0;
+      background-color: #0f0f0f;
       color: #fff;
       font-family: Arial, sans-serif;
     }
@@ -31,27 +32,27 @@
     .search-bar {
       max-width: 1200px;
       margin: 2rem auto 1rem;
-      display: flex; 
-      gap: 1rem; 
+      display: flex;
+      gap: 1rem;
       padding: 0 1rem;
     }
     .search-bar input {
-      flex: 1; 
-      padding: 0.75rem; 
-      font-size: 1rem; 
+      flex: 1;
+      padding: 0.75rem;
+      font-size: 1rem;
       border-radius: 6px;
-      border: 1px solid #333; 
-      background-color: #1c1c1c; 
+      border: 1px solid #333;
+      background-color: #1c1c1c;
       color: #fff;
     }
     .search-bar button {
-      padding: 0.75rem 1.5rem; 
-      border: none; 
+      padding: 0.75rem 1.5rem;
+      border: none;
       border-radius: 6px;
-      background-color: #28a745; 
-      color: #fff; 
+      background-color: #28a745;
+      color: #fff;
       font-size: 1rem;
-      cursor: pointer; 
+      cursor: pointer;
       transition: background 0.3s;
     }
     .search-bar button:hover {
@@ -59,20 +60,20 @@
     }
     /* Left Panel (Token Info) */
     .token-header {
-      display: flex; 
-      align-items: center; 
-      gap: 1rem; 
+      display: flex;
+      align-items: center;
+      gap: 1rem;
       margin-bottom: 1rem;
     }
     .token-logo {
-      width: 48px; 
-      height: 48px; 
-      border-radius: 50%; 
-      background: #333; 
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #333;
       object-fit: cover;
     }
     .token-title {
-      font-size: 1.5rem; 
+      font-size: 1.5rem;
       margin: 0;
       color: #28a745;
     }
@@ -94,24 +95,24 @@
       margin-bottom: 1rem;
     }
     .analysis-score {
-      display: flex; 
-      align-items: center; 
-      gap: 1rem; 
+      display: flex;
+      align-items: center;
+      gap: 1rem;
       margin-bottom: 1.5rem;
     }
     .analysis-circle {
-      width: 80px; 
-      height: 80px; 
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
-      background: #333; 
-      display: flex; 
-      align-items: center; 
+      background: #333;
+      display: flex;
+      align-items: center;
       justify-content: center;
-      font-size: 1.5rem; 
+      font-size: 1.5rem;
       font-weight: bold;
     }
     .analysis-label {
-      font-size: 1.2rem; 
+      font-size: 1.2rem;
       font-weight: bold;
     }
     .analysis-sub {
@@ -121,18 +122,18 @@
       margin: 0.5rem 0;
     }
     .risk-circles {
-      display: flex; 
-      gap: 0.5rem; 
+      display: flex;
+      gap: 0.5rem;
       margin-top: 0.5rem;
     }
     .risk-circle {
-      width: 30px; 
-      height: 30px; 
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      display: flex; 
-      align-items: center; 
+      display: flex;
+      align-items: center;
       justify-content: center;
-      font-weight: bold; 
+      font-weight: bold;
       color: #000;
     }
     .risk-circle.green {
@@ -180,7 +181,7 @@
     /* Responsive */
     @media(max-width: 800px) {
       .analysis-score {
-        flex-direction: column; 
+        flex-direction: column;
         align-items: flex-start;
       }
       .container, .bottom-container {
@@ -235,9 +236,9 @@
   </div>
 </div>
 
-<!-- Bottom Container: Markets, Top Holders, and NEW RugCheck Stats Panel -->
+<!-- Bottom Container: Markets, Top Holders, and RugCheck Stats -->
 <div class="bottom-container">
-  <!-- Markets Panel (placeholder data) -->
+  <!-- Markets Panel (Placeholder Data) -->
   <div class="markets-panel">
     <h2>Markets</h2>
     <table>
@@ -251,7 +252,7 @@
         </tr>
       </thead>
       <tbody id="marketsBody">
-        <!-- We'll populate with placeholder data -->
+        <!-- Populated by JS -->
       </tbody>
     </table>
   </div>
@@ -268,61 +269,40 @@
         </tr>
       </thead>
       <tbody id="holdersBody">
-        <!-- We'll populate with on-chain data -->
+        <!-- Populated by JS -->
       </tbody>
     </table>
   </div>
 
-  <!-- NEW: RugCheck Stats Panel -->
+  <!-- RugCheck Stats Panel (from RugCheck API) -->
   <div class="rugcheck-panel">
     <h2>RugCheck Stats</h2>
     <div id="rugcheckStatsResult" style="margin-top:1rem; color:#ccc;">
-      <!-- We'll populate with data from the RugCheck API -->
+      <!-- RugCheck API stats will be displayed here -->
     </div>
   </div>
 </div>
 
 <!-- Pull in Solana Web3.js library -->
 <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-
 <script>
-  /* ------------------- CONFIG & STATE ------------------- */
-
   // Your Helius RPC Endpoint for on-chain data
   const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
+  
+  // RugCheck API base URL (update this with your actual endpoint if different)
+  const RUGCHECK_API_BASE_URL = "https://api.rugcheck.xyz/api";
 
-  // Solana Token Program
+  // USDC Mint (if needed for conversion, etc.)
+  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt";
+
+  // Token Program ID (SPL Token)
   const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 
-  // Official token list (on GitHub) for name/logo
   let tokenList = [];
   let tokenListLoaded = false;
+  let connection;
 
-  // Placeholder markets data (like your existing code)
-  const marketsData = [
-    {
-      market: "Raydium",
-      address: "RaydiumMarketAddr1",
-      pair: "SOL/USDC",
-      lpMint: "LPMint1",
-      liquidity: "$25,000"
-    },
-    {
-      market: "Orca",
-      address: "OrcaMarketAddr2",
-      pair: "SOL/MEME",
-      lpMint: "LPMint2",
-      liquidity: "$10,000"
-    }
-  ];
-
-  // Example RugCheck API base URL
-  // Replace with your actual endpoint from the Swagger docs
-  const RUGCHECK_API_BASE_URL = "https://api.rugchecker.com/v1";
-
-  let connection; // For Solana on-chain queries
-
-  /* ------------------- LOAD TOKEN LIST ON PAGE LOAD ------------------- */
+  // Load the official Solana token list on page load
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const res = await fetch("https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json");
@@ -333,11 +313,10 @@
     } catch (err) {
       console.error("Error loading token list:", err);
     }
-    // Populate markets with placeholders
-    populateMarketsTable(marketsData);
+    // Populate Markets table with placeholder data (or clear it)
+    populateMarketsTable([]);
   });
 
-  /* ------------------- MAIN RUG CHECK FUNCTION ------------------- */
   async function rugCheck() {
     if (!tokenListLoaded) {
       alert("Still loading the token list. Please wait a moment and try again!");
@@ -356,12 +335,11 @@
       return;
     }
     const fullAddress = publicKey.toBase58();
-
     resetUI(fullAddress);
     connection = new solanaWeb3.Connection(RPC_ENDPOINT);
 
     try {
-      // 1) Look up name/logo from the official token list
+      // 1) Look up token info from the token list
       let tokenEntry = tokenList.find(t => t.address === fullAddress);
       if (tokenEntry) {
         document.getElementById("tokenName").textContent = tokenEntry.name || "Unknown";
@@ -383,13 +361,14 @@
         document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
       }
 
-      // 2) Fetch on-chain data
+      // 2) Fetch on-chain token info
       const parsedInfo = await connection.getParsedAccountInfo(publicKey);
       let isMint = false;
       let isTokenAccount = false;
       let supply = "--";
       let mintAuth = "None";
       let freezeAuth = "None";
+      let decimals = 0;
       if (parsedInfo.value && parsedInfo.value.data && parsedInfo.value.data.parsed) {
         const info = parsedInfo.value.data.parsed.info;
         const type = parsedInfo.value.data.parsed.type;
@@ -398,6 +377,7 @@
           supply = info.supply;
           mintAuth = info.mintAuthority || "None";
           freezeAuth = info.freezeAuthority || "None";
+          decimals = info.decimals;
         } else if (type === "account") {
           isTokenAccount = true;
           mintAuth = "(See Mint)";
@@ -425,7 +405,7 @@
       document.getElementById("freezeAuth").textContent = (freezeAuth === "None") ? "Secure" : "Insecure";
       document.getElementById("freezeAuth").className = (freezeAuth === "None") ? "secure-label" : "insecure-label";
 
-      // 3) Score logic
+      // 3) Compute safety score and update right panel
       const { score, statusLabel, lowCount, medCount, highCount } = computeScoreAndRisk({
         isMint, isTokenAccount, supply, mintAuth, freezeAuth
       });
@@ -436,7 +416,7 @@
       document.getElementById("riskMed").textContent = medCount;
       document.getElementById("riskHigh").textContent = highCount;
 
-      // 4) If it's a mint, fetch top holders
+      // 4) If it's a mint, fetch top holders data
       if (isMint) {
         const topHolders = await fetchTopHolders(connection, fullAddress);
         populateHoldersTable(topHolders);
@@ -444,13 +424,12 @@
         document.getElementById("holdersBody").innerHTML = "";
       }
 
-      // 5) Also call the RugCheck API and display results
+      // 5) Call RugCheck API (for example, GET /stats)
       const statsData = await fetchRugCheckStats();
       if (statsData) {
         displayRugCheckStats(statsData);
       } else {
-        document.getElementById("rugcheckStatsResult").textContent =
-          "No data available from RugCheck API.";
+        document.getElementById("rugcheckStatsResult").textContent = "No data available from RugCheck API.";
       }
 
     } catch (err) {
@@ -460,16 +439,14 @@
   }
 
   /* ------------------- RUGCHECK API CALLS ------------------- */
-  // Example: GET /stats from the RugCheck API
   async function fetchRugCheckStats() {
     try {
-      // Replace /stats with the actual endpoint you want from your Swagger docs
+      // Replace '/stats' with the actual endpoint from your Swagger docs if different
       const response = await fetch(`${RUGCHECK_API_BASE_URL}/stats`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json"
-          // If needed, add auth:
-          // "Authorization": "Bearer <YOUR_TOKEN>"
+          // If needed, add authentication header here
         }
       });
       if (!response.ok) {
@@ -485,7 +462,7 @@
 
   function displayRugCheckStats(stats) {
     const panel = document.getElementById("rugcheckStatsResult");
-    // For demonstration, we just show the JSON:
+    // Display the stats JSON formatted; adapt as needed
     panel.innerHTML = `<pre style="white-space: pre-wrap;">${JSON.stringify(stats, null, 2)}</pre>`;
   }
 
@@ -495,12 +472,7 @@
     const accounts = await conn.getParsedProgramAccounts(TOKEN_PROGRAM_ID, {
       filters: [
         { dataSize: 165 },
-        {
-          memcmp: {
-            offset: 0,
-            bytes: mintPubKey.toBase58()
-          }
-        }
+        { memcmp: { offset: 0, bytes: mintPubKey.toBase58() } }
       ]
     });
     const holders = accounts.map(({ account }) => {
@@ -560,10 +532,9 @@
     let score = 50;
     let statusLabel = "Medium Risk";
     let lowCount = 0, medCount = 0, highCount = 0;
-
     if (isMint) {
       if (mintAuth === "None") {
-        score += 30; 
+        score += 30;
         lowCount += 1;
       } else {
         score -= 20;
@@ -583,7 +554,6 @@
       score -= 10;
       highCount += 1;
     }
-
     const numSupply = parseFloat(supply);
     if (!isNaN(numSupply)) {
       if (numSupply > 1000000000) {
@@ -596,7 +566,6 @@
     }
     if (score < 0) score = 0;
     if (score > 100) score = 100;
-
     if (score >= 80) {
       statusLabel = "Safe";
     } else if (score < 50) {
@@ -623,8 +592,6 @@
     document.getElementById("riskLow").textContent = "0";
     document.getElementById("riskMed").textContent = "0";
     document.getElementById("riskHigh").textContent = "0";
-
-    // Clear existing tables
     document.getElementById("holdersBody").innerHTML = "";
     document.getElementById("marketsBody").innerHTML = "";
     document.getElementById("rugcheckStatsResult").textContent = "";
@@ -633,7 +600,7 @@
   /* ------------------- UTILS ------------------- */
   function shortenAddress(addr) {
     if (addr.length <= 8) return addr;
-    return addr.slice(0,4) + "..." + addr.slice(-4);
+    return addr.slice(0, 4) + "..." + addr.slice(-4);
   }
 
   function formatNumber(numStr) {
