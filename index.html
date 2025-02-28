@@ -5,64 +5,87 @@
   <title>Solana Rug Checker</title>
 </head>
 <body style="background:#111; color:#fff; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; padding:20px;">
-  <h1>Solana Rug Checker</h1>
-  <p>Enter a token address below:</p>
+  <h1>Solana Rug Checker (Hybrid Parsing)</h1>
+  <p>Enter a Solana address (token mint, associated token account, or wallet):</p>
   
   <div style="display:flex; gap:10px;">
     <input
       id="tokenAddress"
       type="text"
-      placeholder="Enter token address"
+      placeholder="Enter any Solana address"
       style="padding:5px;"
     />
     <button onclick="checkToken()">Rug Check</button>
   </div>
 
-  <div id="result" style="margin-top:20px;"></div>
+  <div id="result" style="margin-top:20px; white-space:pre; font-family:monospace;"></div>
 
   <!-- Pull in the Solana Web3.js library from unpkg or jsDelivr -->
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
   <!-- Alternative: <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.js"></script> -->
 
   <script>
+    // Custom RPC endpoint to avoid default clusterApiUrl 403
+    const RPC_ENDPOINT = "https://rpc.ankr.com/solana";
+    // You can swap for other endpoints if you get blocked again:
+    // "https://solana-api.projectserum.com"
+    // "https://api.metaplex.solana.com"
+    // or sign up for QuickNode / Alchemy / Helius, etc.
+
     async function checkToken() {
-      const address = document.getElementById('tokenAddress').value.trim();
+      const addressInput = document.getElementById('tokenAddress');
       const resultDiv = document.getElementById('result');
+      const address = addressInput.value.trim();
+      resultDiv.textContent = ""; // Clear previous results
 
       if (!address) {
         alert('Please enter a token address!');
         return;
       }
 
-      // Try a different public RPC to avoid 403 blocks
-      const RPC_ENDPOINT = "https://rpc.ankr.com/solana";
-      // Other public endpoints you can try:
-      //   "https://solana-api.projectserum.com"
-      //   "https://api.metaplex.solana.com"
-      //   "https://api.mainnet.rpcpool.com"
-
-      // Or sign up for QuickNode / Alchemy for your own dedicated URL:
-      //   const RPC_ENDPOINT = "https://<YOUR-QUICKNODE-OR-ALCHEMY-URL>/";
-
+      // Connect to the custom Solana RPC
       const connection = new solanaWeb3.Connection(RPC_ENDPOINT);
 
       try {
+        // Convert user input into a PublicKey
         const publicKey = new solanaWeb3.PublicKey(address);
-        const accountInfo = await connection.getParsedAccountInfo(publicKey);
 
-        if (!accountInfo.value) {
-          resultDiv.innerText = `No data found for ${address}.`;
+        // 1) Try getParsedAccountInfo first (works if it's an SPL token mint or token account)
+        const parsedInfo = await connection.getParsedAccountInfo(publicKey);
+
+        if (parsedInfo.value) {
+          // If it returns something, let's see if it's "parsed" data
+          const parsedData = parsedInfo.value.data;
+          if (parsedData && parsedData.parsed) {
+            // We have a recognized SPL token format
+            const owner = parsedData.parsed.info?.owner || 'N/A';
+            const type  = parsedData.parsed.type || 'N/A';
+            resultDiv.textContent = `SPL Token Account Info:\nOwner: ${owner}\nType: ${type}`;
+            return;
+          }
+        }
+
+        // 2) If we reach here, either there's no parsed data or it's a system account
+        //    So let's just get raw account info
+        const rawInfo = await connection.getAccountInfo(publicKey);
+        if (!rawInfo) {
+          resultDiv.textContent = `No data found for ${address}.`;
           return;
         }
 
-        const data  = accountInfo.value.data;
-        const owner = data?.parsed?.info?.owner || 'N/A';
-        const type  = data?.parsed?.type  || 'N/A';
-        resultDiv.innerText = `Owner: ${owner}\nType: ${type}`;
-
+        // Display basic raw info
+        const ownerProgram = rawInfo.owner.toBase58();
+        const dataSize = rawInfo.data.length;
+        const isExecutable = rawInfo.executable;
+        resultDiv.textContent =
+          `Raw Account Info:\n` +
+          `Owner Program: ${ownerProgram}\n` +
+          `Data Size: ${dataSize} bytes\n` +
+          `Executable: ${isExecutable}`;
+        
       } catch (error) {
         console.error(error);
-        resultDiv.innerText = 'Error fetching token info. Check console.';
+        resultDiv.textContent = 'Error fetching token info. Check console.\n' + error;
       }
     }
   </script>
