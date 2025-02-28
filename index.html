@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Solana Rug Checker</title>
   <style>
     body {
@@ -11,17 +11,30 @@
       color: #fff;
       font-family: Arial, sans-serif;
     }
-    /* Removed header/nav styles */
-
-    .main-container {
-      max-width: 1200px; 
-      margin: 2rem auto; 
+    /* Container for both panels */
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
       padding: 0 1rem;
     }
+    .left-panel, .right-panel {
+      background: #151515;
+      border-radius: 8px;
+      padding: 1.5rem;
+      flex: 1 1 300px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    /* Search Bar */
     .search-bar {
+      max-width: 1200px;
+      margin: 2rem auto 1rem;
       display: flex; 
       gap: 1rem; 
-      margin-bottom: 2rem;
+      padding: 0 1rem;
     }
     .search-bar input {
       flex: 1; 
@@ -46,103 +59,175 @@
       background-color: #218838;
     }
 
-    .results-container {
-      display: grid; 
-      grid-template-columns: 1fr 1fr 1fr; 
-      gap: 1.5rem;
-    }
-    .box {
-      background: #151515; 
-      padding: 1.5rem; 
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    }
-    .box h2 {
-      margin-top: 0; 
+    /* Left Panel (Token Info) */
+    .token-header {
+      display: flex; 
+      align-items: center; 
+      gap: 1rem; 
       margin-bottom: 1rem;
-      font-size: 1.2rem; 
+    }
+    .token-logo {
+      width: 48px; 
+      height: 48px; 
+      border-radius: 50%; 
+      background: #333; 
+      object-fit: cover;
+    }
+    .token-title {
+      font-size: 1.5rem; 
+      margin: 0;
       color: #28a745;
     }
     .token-info p {
-      margin: 0.3rem 0;
+      margin: 0.5rem 0;
     }
-    /* Score circle */
-    .score-circle {
-      width: 100px; 
-      height: 100px; 
+    .secure-label {
+      color: #28a745;
+      font-weight: bold;
+    }
+    .insecure-label {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    /* Right Panel (Analysis) */
+    .right-panel h2 {
+      color: #28a745;
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+    .analysis-score {
+      display: flex; 
+      align-items: center; 
+      gap: 1rem; 
+      margin-bottom: 1.5rem;
+    }
+    .analysis-circle {
+      width: 80px; 
+      height: 80px; 
       border-radius: 50%;
       background: #333; 
       display: flex; 
       align-items: center; 
       justify-content: center;
-      font-size: 2rem; 
+      font-size: 1.5rem; 
+      font-weight: bold;
+    }
+    .analysis-label {
+      font-size: 1.2rem; 
+      font-weight: bold;
+    }
+    .analysis-sub {
+      color: #ccc;
+    }
+    .risk-factors h3 {
+      margin: 0.5rem 0;
+    }
+    .risk-circles {
+      display: flex; 
+      gap: 0.5rem; 
+      margin-top: 0.5rem;
+    }
+    .risk-circle {
+      width: 30px; 
+      height: 30px; 
+      border-radius: 50%;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
       font-weight: bold; 
-      margin: 1rem auto;
+      color: #000;
     }
-    .score-label {
-      text-align: center; 
-      font-size: 1.1rem; 
-      margin-bottom: 1rem;
+    .risk-circle.green {
+      background: #28a745;
     }
-    .risk-level {
-      font-weight: bold; 
-      color: #ffc107; 
-      margin-bottom: 1rem;
+    .risk-circle.yellow {
+      background: #ffc107;
     }
-    .risk-level.high { color: #dc3545; }
-    .risk-level.safe { color: #28a745; }
+    .risk-circle.red {
+      background: #dc3545;
+    }
 
     /* Responsive */
-    @media(max-width: 900px) {
-      .results-container {
-        grid-template-columns: 1fr;
+    @media(max-width: 800px) {
+      .analysis-score {
+        flex-direction: column; 
+        align-items: flex-start;
       }
     }
   </style>
 </head>
 <body>
 
-<!-- Removed header/nav -->
-
-<div class="main-container">
-  <div class="search-bar">
-    <input id="tokenAddress" type="text" placeholder="token address here" />
-    <button onclick="rugCheck()">Rug Check</button>
-  </div>
-
-  <div class="results-container">
-    <!-- Token Info -->
-    <div class="box token-info">
-      <h2>Token Info</h2>
-      <p><strong>Token Address:</strong> <span id="tokenAddr"></span></p>
-      <p><strong>Supply:</strong> <span id="tokenSupply"></span></p>
-      <p><strong>Mint Authority:</strong> <span id="mintAuth"></span></p>
-      <p><strong>Freeze Authority:</strong> <span id="freezeAuth"></span></p>
-      <p><strong>Social Links:</strong> <span id="socialLinks">No info found</span></p>
-    </div>
-
-    <!-- Token Safety Analysis -->
-    <div class="box center-box">
-      <h2>Token Safety Analysis</h2>
-      <div class="score-circle" id="scoreCircle">--</div>
-      <div class="score-label" id="scoreLabel">Score: --/100</div>
-      <div id="safetyStatus" style="text-align:center;">Unknown</div>
-    </div>
-
-    <!-- Risk Factors -->
-    <div class="box">
-      <h2>Risk Factors</h2>
-      <div class="risk-level" id="riskLevel">No analysis yet</div>
-      <ul id="riskList"></ul>
-    </div>
-  </div>
+<!-- Search Bar -->
+<div class="search-bar">
+  <input id="tokenAddress" type="text" placeholder="Enter token address" />
+  <button onclick="rugCheck()">Rug Check</button>
 </div>
 
-<!-- Pull in the Solana Web3.js library -->
+<!-- Main Container -->
+<div class="container">
+
+  <!-- Left Panel: Token Info -->
+  <div class="left-panel">
+    <div class="token-header">
+      <img id="tokenLogo" class="token-logo" src="" alt="Token Logo">
+      <h2 id="tokenName" class="token-title">Unknown</h2>
+    </div>
+    <div class="token-info">
+      <p><strong>Token Address:</strong> <span id="tokenAddr">--</span></p>
+      <p><strong>Supply:</strong> <span id="tokenSupply">--</span></p>
+      <p><strong>Mint Authority:</strong> <span id="mintAuth">--</span></p>
+      <p><strong>Freeze Authority:</strong> <span id="freezeAuth">--</span></p>
+      <p><strong>Social Links:</strong> <span id="socialLinks">No info found</span></p>
+    </div>
+  </div>
+
+  <!-- Right Panel: Analysis -->
+  <div class="right-panel">
+    <h2>Token Safety Analysis</h2>
+    <div class="analysis-score">
+      <div class="analysis-circle" id="scoreCircle">--</div>
+      <div>
+        <div class="analysis-label" id="safetyStatus">Unknown</div>
+        <div class="analysis-sub" id="scoreLabel">Safety Score: -- / 100</div>
+      </div>
+    </div>
+    <div class="risk-factors">
+      <h3>Risk Factor Count:</h3>
+      <div class="risk-circles">
+        <div class="risk-circle green" id="riskLow">0</div>
+        <div class="risk-circle yellow" id="riskMed">0</div>
+        <div class="risk-circle red" id="riskHigh">0</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Pull in Solana Web3.js library -->
 <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+
 <script>
-  // Replace with your Helius endpoint
+  // Your Helius RPC Endpoint
   const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
+  
+  // We load the official Solana Token List for logos/names
+  let tokenList = [];
+
+  async function loadTokenList() {
+    try {
+      const res = await fetch("https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json");
+      const data = await res.json();
+      tokenList = data.tokens || [];
+      console.log("Token list loaded. Count:", tokenList.length);
+    } catch (err) {
+      console.error("Error loading token list:", err);
+    }
+  }
+
+  // On page load, fetch the token list
+  window.addEventListener("DOMContentLoaded", loadTokenList);
 
   async function rugCheck() {
     const address = document.getElementById('tokenAddress').value.trim();
@@ -150,21 +235,25 @@
       alert("Please enter a token address!");
       return;
     }
-    // Reset fields
-    document.getElementById('tokenAddr').textContent   = address;
-    document.getElementById('tokenSupply').textContent = "--";
-    document.getElementById('mintAuth').textContent    = "--";
-    document.getElementById('freezeAuth').textContent  = "--";
-    document.getElementById('socialLinks').textContent = "No info found";
-    document.getElementById('scoreCircle').textContent = "--";
-    document.getElementById('scoreLabel').textContent  = "Score: --/100";
-    document.getElementById('safetyStatus').textContent= "Unknown";
-    document.getElementById('riskLevel').textContent   = "No analysis yet";
-    document.getElementById('riskList').innerHTML      = "";
+    // Reset UI
+    resetUI(address);
 
     const connection = new solanaWeb3.Connection(RPC_ENDPOINT);
+
     try {
       const publicKey = new solanaWeb3.PublicKey(address);
+      // Attempt to find a token entry for the logo + name
+      const tokenEntry = tokenList.find(t => t.address === address);
+
+      if (tokenEntry) {
+        document.getElementById("tokenName").textContent = tokenEntry.name;
+        document.getElementById("tokenLogo").src = tokenEntry.logoURI;
+      } else {
+        document.getElementById("tokenName").textContent = "Unknown";
+        document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+      }
+
+      // Let's fetch on-chain info
       const parsedInfo = await connection.getParsedAccountInfo(publicKey);
 
       let isMint = false;
@@ -173,7 +262,6 @@
       let mintAuth = "None";
       let freezeAuth = "None";
 
-      // Check if we got parsed data
       if (parsedInfo.value && parsedInfo.value.data && parsedInfo.value.data.parsed) {
         const info = parsedInfo.value.data.parsed.info;
         const type = parsedInfo.value.data.parsed.type;
@@ -187,19 +275,20 @@
         } else if (type === "account") {
           // It's a token holding account
           isTokenAccount = true;
-          // If you want supply, you'd need to get the mint from 'info.mint' and fetch that separately
-          mintAuth     = "(See Mint)";
-          freezeAuth   = "(See Mint)";
+          // If you want the mint supply, you'd fetch getTokenSupply(info.mint)
+          // for now, partial data only
+          mintAuth   = "(See Mint)";
+          freezeAuth = "(See Mint)";
         }
       } else {
-        // Fallback: get raw info
+        // If not recognized as SPL token, fetch raw info
         const rawInfo = await connection.getAccountInfo(publicKey);
         if (!rawInfo) {
           console.log("No data found for", address);
         }
       }
 
-      // If it's a mint, let's fetch more details with getTokenSupply
+      // If it's a mint, get more accurate supply
       if (isMint) {
         const tokenSupply = await connection.getTokenSupply(publicKey);
         if (tokenSupply.value) {
@@ -207,38 +296,31 @@
         }
       }
 
-      // Update UI
-      document.getElementById('tokenSupply').textContent = supply;
-      document.getElementById('mintAuth').textContent    = mintAuth;
-      document.getElementById('freezeAuth').textContent  = freezeAuth;
+      // Update the left panel
+      document.getElementById("tokenAddr").textContent    = shortenAddress(address);
+      document.getElementById("tokenSupply").textContent  = formatNumber(supply);
+      document.getElementById("mintAuth").textContent     = (mintAuth === "None") 
+        ? "Secure" : "Insecure";
+      document.getElementById("mintAuth").className       = (mintAuth === "None") 
+        ? "secure-label" : "insecure-label";
+      document.getElementById("freezeAuth").textContent   = (freezeAuth === "None")
+        ? "Secure" : "Insecure";
+      document.getElementById("freezeAuth").className     = (freezeAuth === "None")
+        ? "secure-label" : "insecure-label";
 
-      // Compute a "score" & risk factors
-      const { score, riskLabel, riskFactors, statusLabel } = computeScoreAndRisk({
-        isMint,
-        isTokenAccount,
-        supply,
-        mintAuthority: mintAuth,
-        freezeAuthority: freezeAuth
-      });
+      // Compute Score + Risk Factors
+      const { score, statusLabel, riskLabel, lowCount, medCount, highCount } 
+        = computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuth, freezeAuth });
 
-      // Update visuals
-      document.getElementById('scoreCircle').textContent = score;
-      document.getElementById('scoreLabel').textContent  = `Score: ${score}/100`;
-      document.getElementById('safetyStatus').textContent= statusLabel;
+      // Update right panel
+      document.getElementById("scoreCircle").textContent = score;
+      document.getElementById("scoreLabel").textContent  = `Safety Score: ${score} / 100`;
+      document.getElementById("safetyStatus").textContent= statusLabel;
 
-      const riskEl = document.getElementById('riskLevel');
-      riskEl.textContent = riskLabel;
-      riskEl.className = "risk-level";
-      if (riskLabel === "High Risk") riskEl.classList.add("high");
-      else if (riskLabel === "Safe") riskEl.classList.add("safe");
-
-      // Populate risk list
-      const riskList = document.getElementById('riskList');
-      riskFactors.forEach(f => {
-        const li = document.createElement('li');
-        li.textContent = f;
-        riskList.appendChild(li);
-      });
+      // Risk factor circles
+      document.getElementById("riskLow").textContent  = lowCount;
+      document.getElementById("riskMed").textContent  = medCount;
+      document.getElementById("riskHigh").textContent = highCount;
 
     } catch (err) {
       console.error(err);
@@ -246,58 +328,91 @@
     }
   }
 
-  // Simple placeholder logic for scoring
-  function computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuthority, freezeAuthority }) {
-    let score = 50; 
-    let riskFactors = [];
+  /* Placeholder logic for scoring + risk factor counts. 
+     You can refine or add real logic for your project. */
+  function computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuth, freezeAuth }) {
+    let score = 50;
+    let statusLabel = "Medium Risk";
 
-    // If it's a mint with 'None' authority, we assume it's safer
+    // We'll track "lowCount, medCount, highCount" for the colored circles
+    let lowCount = 0, medCount = 0, highCount = 0;
+
+    // If it's a recognized mint
     if (isMint) {
-      if (mintAuthority === "None") {
-        score += 30;
+      if (mintAuth === "None") {
+        score += 30; // more trust
       } else {
-        riskFactors.push("Mint authority is active (possible future minting).");
         score -= 20;
+        highCount += 1; // active mint authority is high risk
       }
-      if (freezeAuthority === "None") {
+      if (freezeAuth === "None") {
         score += 10;
       } else {
-        riskFactors.push("Freeze authority is active (can freeze tokens).");
         score -= 10;
+        medCount += 1; // freeze authority is medium risk
       }
     } else if (isTokenAccount) {
-      riskFactors.push("This is a token account, not a mint. Can't verify mint settings here.");
       score -= 5;
+      medCount += 1; // We can't verify the mint settings from the account alone
     } else {
-      riskFactors.push("Not recognized as a token mint or token account.");
+      // Not recognized as SPL token
       score -= 10;
+      highCount += 1;
     }
 
-    const numericSupply = parseFloat(supply);
-    if (!isNaN(numericSupply)) {
-      if (numericSupply > 1000000000) {
-        riskFactors.push("Very large supply (could be inflationary).");
+    // If supply is huge, consider that a possible risk
+    const numSupply = parseFloat(supply);
+    if (!isNaN(numSupply)) {
+      if (numSupply > 1000000000) {
         score -= 10;
+        medCount += 1;
       } else {
         score += 5;
       }
     }
 
     // Bound the score
-    if (score < 0) score = 0;
+    if (score < 0)   score = 0;
     if (score > 100) score = 100;
 
-    let riskLabel = "Medium Risk";
-    let statusLabel = "Caution";
     if (score >= 80) {
-      riskLabel = "Safe";
       statusLabel = "Safe";
     } else if (score < 50) {
-      riskLabel = "High Risk";
       statusLabel = "High Risk";
     }
 
-    return { score, riskLabel, riskFactors, statusLabel };
+    return { score, statusLabel, riskLabel: statusLabel, lowCount, medCount, highCount };
+  }
+
+  function resetUI(address) {
+    document.getElementById("tokenName").textContent = "Unknown";
+    document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+    document.getElementById("tokenAddr").textContent = address;
+    document.getElementById("tokenSupply").textContent = "--";
+    document.getElementById("mintAuth").textContent = "--";
+    document.getElementById("freezeAuth").textContent = "--";
+    document.getElementById("mintAuth").className = "";
+    document.getElementById("freezeAuth").className = "";
+    document.getElementById("scoreCircle").textContent = "--";
+    document.getElementById("safetyStatus").textContent = "Unknown";
+    document.getElementById("scoreLabel").textContent = "Safety Score: -- / 100";
+    document.getElementById("riskLow").textContent  = "0";
+    document.getElementById("riskMed").textContent  = "0";
+    document.getElementById("riskHigh").textContent = "0";
+  }
+
+  // Shorten address to e.g. "mo7m...Wi5N"
+  function shortenAddress(addr) {
+    if (addr.length <= 8) return addr;
+    return addr.slice(0,4) + "..." + addr.slice(-4);
+  }
+
+  // Format supply with commas
+  function formatNumber(numStr) {
+    if (numStr === "--") return "--";
+    const n = parseFloat(numStr);
+    if (isNaN(n)) return numStr;
+    return n.toLocaleString();
   }
 </script>
 </body>
