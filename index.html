@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Solana Rug Checker</title>
   <style>
-    /* (Same styles you already have) */
     body {
       margin: 0; 
       padding: 0; 
@@ -12,6 +11,7 @@
       color: #fff;
       font-family: Arial, sans-serif;
     }
+    /* Container for top panels */
     .container {
       max-width: 1200px;
       margin: 2rem auto;
@@ -27,6 +27,7 @@
       flex: 1 1 300px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
+    /* Search Bar */
     .search-bar {
       max-width: 1200px;
       margin: 2rem auto 1rem;
@@ -56,6 +57,7 @@
     .search-bar button:hover {
       background-color: #218838;
     }
+    /* Left Panel (Token Info) */
     .token-header {
       display: flex; 
       align-items: center; 
@@ -85,6 +87,7 @@
       color: #dc3545;
       font-weight: bold;
     }
+    /* Right Panel (Analysis) */
     .right-panel h2 {
       color: #28a745;
       margin-top: 0;
@@ -141,8 +144,7 @@
     .risk-circle.red {
       background: #dc3545;
     }
-
-    /* Table for Top Holders */
+    /* Bottom Container for Markets & Top Holders */
     .bottom-container {
       max-width: 1200px;
       margin: 0 auto 2rem;
@@ -151,7 +153,7 @@
       gap: 2rem;
       padding: 0 1rem;
     }
-    .holders-panel {
+    .markets-panel, .holders-panel {
       background: #151515;
       border-radius: 8px;
       padding: 1.5rem;
@@ -175,6 +177,16 @@
     td {
       color: #ccc;
     }
+    /* Responsive */
+    @media(max-width: 800px) {
+      .analysis-score {
+        flex-direction: column; 
+        align-items: flex-start;
+      }
+      .container, .bottom-container {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
@@ -185,9 +197,8 @@
   <button onclick="rugCheck()">Rug Check</button>
 </div>
 
-<!-- Main Container -->
+<!-- Top Panels Container -->
 <div class="container">
-
   <!-- Left Panel: Token Info -->
   <div class="left-panel">
     <div class="token-header">
@@ -224,8 +235,29 @@
   </div>
 </div>
 
-<!-- New: Bottom Container with a "Top Holders" panel -->
+<!-- Bottom Container: Markets & Top Holders -->
 <div class="bottom-container">
+  <!-- Markets Panel -->
+  <div class="markets-panel">
+    <h2>Markets</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Market</th>
+          <th>Address</th>
+          <th>Pair</th>
+          <th>LP Mint</th>
+          <th>Liquidity</th>
+          <th>LP Locked</th>
+        </tr>
+      </thead>
+      <tbody id="marketsBody">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Top Holders Panel -->
   <div class="holders-panel">
     <h2>Top Holders</h2>
     <table>
@@ -237,7 +269,7 @@
         </tr>
       </thead>
       <tbody id="holdersBody">
-        <!-- We'll populate with real data below -->
+        <!-- Populated by JS -->
       </tbody>
     </table>
   </div>
@@ -246,18 +278,37 @@
 <!-- Pull in Solana Web3.js library -->
 <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
 <script>
+  // Your Helius RPC Endpoint
   const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
+
+  // Token Program ID (SPL Token)
+  const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 
   let tokenList = [];
   let tokenListLoaded = false;
   let connection;
 
-  // Token Program ID
-  const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey(
-    "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-  );
+  // Placeholder markets data (replace with real API calls later)
+  const marketsData = [
+    {
+      market: "Raydium",
+      address: "RaydiumMarketAddr1",
+      pair: "SOL/USDC",
+      lpMint: "LPMint1",
+      liquidity: "$25,000",
+      lpLocked: "100%"
+    },
+    {
+      market: "Orca",
+      address: "OrcaMarketAddr2",
+      pair: "SOL/MEME",
+      lpMint: "LPMint2",
+      liquidity: "$10,000",
+      lpLocked: "100%"
+    }
+  ];
 
-  // Load the official Solana token list on page load
+  // Load token list on page load
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const res = await fetch("https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json");
@@ -268,6 +319,8 @@
     } catch (err) {
       console.error("Error loading token list:", err);
     }
+    // Populate Markets table with placeholder data
+    populateMarketsTable(marketsData);
   });
 
   async function rugCheck() {
@@ -293,45 +346,31 @@
     connection = new solanaWeb3.Connection(RPC_ENDPOINT);
 
     try {
-      // Try to find a token entry for the logo + name
+      // Look up token info in the token list
       const tokenEntry = tokenList.find(t => t.address === fullAddress);
 
       if (tokenEntry) {
         document.getElementById("tokenName").textContent = tokenEntry.name || "Unknown";
         document.getElementById("tokenLogo").src = tokenEntry.logoURI || "https://via.placeholder.com/48/333/fff?text=No+Logo";
-        
-        // Attempt to parse social links from "extensions"
         if (tokenEntry.extensions) {
           const ex = tokenEntry.extensions;
           let links = [];
-          if (ex.website) {
-            links.push(`<a href="${ex.website}" target="_blank">Website</a>`);
-          }
+          if (ex.website) links.push(`<a href="${ex.website}" target="_blank">Website</a>`);
           if (ex.twitter) {
             const twitterHandle = ex.twitter.replace('@','');
             links.push(`<a href="https://twitter.com/${twitterHandle}" target="_blank">Twitter</a>`);
           }
-          if (ex.discord) {
-            links.push(`<a href="${ex.discord}" target="_blank">Discord</a>`);
-          }
-          if (ex.telegram) {
-            links.push(`<a href="${ex.telegram}" target="_blank">Telegram</a>`);
-          }
-          if (links.length > 0) {
-            document.getElementById("socialLinks").innerHTML = links.join(" | ");
-          } else {
-            document.getElementById("socialLinks").textContent = "No info found";
-          }
+          if (ex.discord) links.push(`<a href="${ex.discord}" target="_blank">Discord</a>`);
+          if (ex.telegram) links.push(`<a href="${ex.telegram}" target="_blank">Telegram</a>`);
+          document.getElementById("socialLinks").innerHTML = links.length ? links.join(" | ") : "No info found";
         }
       } else {
-        // Not in token list
         document.getElementById("tokenName").textContent = "Unknown";
         document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
       }
 
-      // On-chain info
+      // Get on-chain token info
       const parsedInfo = await connection.getParsedAccountInfo(publicKey);
-
       let isMint = false;
       let isTokenAccount = false;
       let supply = "--";
@@ -341,27 +380,23 @@
       if (parsedInfo.value && parsedInfo.value.data && parsedInfo.value.data.parsed) {
         const info = parsedInfo.value.data.parsed.info;
         const type = parsedInfo.value.data.parsed.type;
-        
         if (type === "mint") {
-          // It's a token mint
           isMint = true;
-          supply       = info.supply;
-          mintAuth     = info.mintAuthority   || "None";
-          freezeAuth   = info.freezeAuthority || "None";
+          supply = info.supply;
+          mintAuth = info.mintAuthority || "None";
+          freezeAuth = info.freezeAuthority || "None";
         } else if (type === "account") {
           isTokenAccount = true;
-          mintAuth   = "(See Mint)";
+          mintAuth = "(See Mint)";
           freezeAuth = "(See Mint)";
         }
       } else {
-        // If not recognized as SPL token, try raw
         const rawInfo = await connection.getAccountInfo(publicKey);
         if (!rawInfo) {
           console.log("No data found for", fullAddress);
         }
       }
 
-      // If it's a mint, get more accurate supply
       if (isMint) {
         const tokenSupply = await connection.getTokenSupply(publicKey);
         if (tokenSupply.value) {
@@ -369,87 +404,69 @@
         }
       }
 
-      // Update left panel
-      document.getElementById("tokenAddr").textContent    = shortenAddress(fullAddress);
-      document.getElementById("tokenAddr").title          = fullAddress;
-      document.getElementById("tokenSupply").textContent  = formatNumber(supply);
-      document.getElementById("mintAuth").textContent     = (mintAuth === "None") 
-        ? "Secure" : "Insecure";
-      document.getElementById("mintAuth").className       = (mintAuth === "None") 
-        ? "secure-label" : "insecure-label";
-      document.getElementById("freezeAuth").textContent   = (freezeAuth === "None")
-        ? "Secure" : "Insecure";
-      document.getElementById("freezeAuth").className     = (freezeAuth === "None")
-        ? "secure-label" : "insecure-label";
+      document.getElementById("tokenAddr").textContent = shortenAddress(fullAddress);
+      document.getElementById("tokenAddr").title = fullAddress;
+      document.getElementById("tokenSupply").textContent = formatNumber(supply);
+      document.getElementById("mintAuth").textContent = (mintAuth === "None") ? "Secure" : "Insecure";
+      document.getElementById("mintAuth").className = (mintAuth === "None") ? "secure-label" : "insecure-label";
+      document.getElementById("freezeAuth").textContent = (freezeAuth === "None") ? "Secure" : "Insecure";
+      document.getElementById("freezeAuth").className = (freezeAuth === "None") ? "secure-label" : "insecure-label";
 
-      // Score logic
-      const { score, statusLabel, lowCount, medCount, highCount } 
-        = computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuth, freezeAuth });
+      const { score, statusLabel, lowCount, medCount, highCount } = computeScoreAndRisk({
+        isMint, isTokenAccount, supply, mintAuth, freezeAuth
+      });
       document.getElementById("scoreCircle").textContent = score;
-      document.getElementById("scoreLabel").textContent  = `Safety Score: ${score} / 100`;
-      document.getElementById("safetyStatus").textContent= statusLabel;
-      document.getElementById("riskLow").textContent  = lowCount;
-      document.getElementById("riskMed").textContent  = medCount;
+      document.getElementById("scoreLabel").textContent = `Safety Score: ${score} / 100`;
+      document.getElementById("safetyStatus").textContent = statusLabel;
+      document.getElementById("riskLow").textContent = lowCount;
+      document.getElementById("riskMed").textContent = medCount;
       document.getElementById("riskHigh").textContent = highCount;
 
-      // Finally, fetch top holders if it's a mint
+      // Fetch and populate Top Holders if it's a mint
       if (isMint) {
         const topHolders = await fetchTopHolders(connection, fullAddress);
         populateHoldersTable(topHolders);
       } else {
-        // If not a mint, clear or show something else
         document.getElementById("holdersBody").innerHTML = "";
       }
-
     } catch (err) {
       console.error(err);
       alert("Error fetching token info. Check console.");
     }
   }
 
-  // =============== TOP HOLDERS LOGIC ===============
+  // Top Holders: Fetch top 5 holders for a given mint
   async function fetchTopHolders(conn, mintAddress) {
     const mintPubKey = new solanaWeb3.PublicKey(mintAddress);
-    // 1) Get all token accounts for this mint
     const accounts = await conn.getParsedProgramAccounts(TOKEN_PROGRAM_ID, {
       filters: [
-        { dataSize: 165 }, // size of a SPL token account
+        { dataSize: 165 },
         {
           memcmp: {
-            offset: 0, // where the mint is stored
+            offset: 0,
             bytes: mintPubKey.toBase58()
           }
         }
       ]
     });
-
-    // 2) Parse each account’s owner + balance
     const holders = accounts.map(({ account }) => {
       const info = account.data.parsed.info;
-      const owner = info.owner; // the wallet that holds these tokens
-      const amount = info.tokenAmount.uiAmount; // float
+      const owner = info.owner;
+      const amount = info.tokenAmount.uiAmount;
       return { owner, amount };
     });
-
-    // 3) Sort descending by balance
     holders.sort((a, b) => b.amount - a.amount);
-
-    // 4) Sum total to compute percentages
     const total = holders.reduce((sum, h) => sum + h.amount, 0);
-
-    // 5) Take top 5
     const top5 = holders.slice(0, 5).map(h => ({
       ...h,
       percentage: total > 0 ? ((h.amount / total) * 100).toFixed(2) + "%" : "0%"
     }));
-
     return top5;
   }
 
   function populateHoldersTable(topHolders) {
     const holdersBody = document.getElementById("holdersBody");
-    holdersBody.innerHTML = ""; // clear old rows
-
+    holdersBody.innerHTML = "";
     topHolders.forEach(h => {
       const row = document.createElement("tr");
       row.innerHTML = `
@@ -460,14 +477,30 @@
       holdersBody.appendChild(row);
     });
   }
-  // =============== END TOP HOLDERS LOGIC ===============
 
-  // Score logic (same as before)
+  // Placeholder: Populate Markets table with dummy data
+  function populateMarketsTable(markets) {
+    const marketsBody = document.getElementById("marketsBody");
+    marketsBody.innerHTML = "";
+    markets.forEach(m => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${m.market}</td>
+        <td>${m.address}</td>
+        <td>${m.pair}</td>
+        <td>${m.lpMint}</td>
+        <td>${m.liquidity}</td>
+        <td>${m.lpLocked}</td>
+      `;
+      marketsBody.appendChild(row);
+    });
+  }
+
+  // Score logic (placeholder)
   function computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuth, freezeAuth }) {
     let score = 50;
     let statusLabel = "Medium Risk";
     let lowCount = 0, medCount = 0, highCount = 0;
-
     if (isMint) {
       if (mintAuth === "None") {
         score += 30; 
@@ -490,7 +523,6 @@
       score -= 10;
       highCount += 1;
     }
-
     const numSupply = parseFloat(supply);
     if (!isNaN(numSupply)) {
       if (numSupply > 1000000000) {
@@ -501,39 +533,33 @@
         lowCount += 1;
       }
     }
-
-    if (score < 0)   score = 0;
+    if (score < 0) score = 0;
     if (score > 100) score = 100;
-
     if (score >= 80) {
       statusLabel = "Safe";
     } else if (score < 50) {
       statusLabel = "High Risk";
     }
-
     return { score, statusLabel, lowCount, medCount, highCount };
   }
 
-  // Reset UI on each new search
   function resetUI(fullAddress) {
     document.getElementById("tokenName").textContent = "Unknown";
     document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
     document.getElementById("tokenAddr").textContent = shortenAddress(fullAddress);
-    document.getElementById("tokenAddr").title       = fullAddress;
+    document.getElementById("tokenAddr").title = fullAddress;
     document.getElementById("tokenSupply").textContent = "--";
-    document.getElementById("mintAuth").textContent    = "--";
-    document.getElementById("freezeAuth").textContent  = "--";
+    document.getElementById("mintAuth").textContent = "--";
+    document.getElementById("freezeAuth").textContent = "--";
     document.getElementById("mintAuth").className = "";
     document.getElementById("freezeAuth").className = "";
     document.getElementById("socialLinks").textContent = "No info found";
     document.getElementById("scoreCircle").textContent = "--";
-    document.getElementById("scoreLabel").textContent  = "Safety Score: -- / 100";
-    document.getElementById("safetyStatus").textContent= "Unknown";
-    document.getElementById("riskLow").textContent  = "0";
-    document.getElementById("riskMed").textContent  = "0";
+    document.getElementById("scoreLabel").textContent = "Safety Score: -- / 100";
+    document.getElementById("safetyStatus").textContent = "Unknown";
+    document.getElementById("riskLow").textContent = "0";
+    document.getElementById("riskMed").textContent = "0";
     document.getElementById("riskHigh").textContent = "0";
-
-    // Clear holders table
     document.getElementById("holdersBody").innerHTML = "";
   }
 
