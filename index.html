@@ -244,7 +244,7 @@
 
 <!-- Bottom Container: Markets & Top Holders -->
 <div class="bottom-container">
-  <!-- Markets Panel (Placeholder Data) -->
+  <!-- Markets Panel (Now using Dexscreener API) -->
   <div class="markets-panel">
     <h2>Markets</h2>
     <table>
@@ -287,34 +287,14 @@
 <script>
   // Your Helius RPC Endpoint
   const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
-  // USDC Mint on Solana (for placeholder price display)
+  // USDC Mint on Solana for reference (to get price in USDC)
   const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt";
-  // Token Program ID for SPL tokens
+  // Token Program ID
   const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 
   let tokenList = [];
   let tokenListLoaded = false;
   let connection;
-
-  // Placeholder markets data (you can replace this with real API data later)
-  const marketsData = [
-    {
-      market: "Raydium",
-      address: "RaydiumMarketAddr1",
-      pair: "SOL/USDC",
-      lpMint: "LPMint1",
-      liquidity: "$25,000",
-      price: "0.987654"
-    },
-    {
-      market: "Orca",
-      address: "OrcaMarketAddr2",
-      pair: "SOL/MEME",
-      lpMint: "LPMint2",
-      liquidity: "$10,000",
-      price: "0.123456"
-    }
-  ];
 
   // Load token list on page load
   window.addEventListener("DOMContentLoaded", async () => {
@@ -327,8 +307,8 @@
     } catch (err) {
       console.error("Error loading token list:", err);
     }
-    // Populate Markets table with placeholder data
-    populateMarketsTable(marketsData);
+    // For now, clear markets table; it will be populated after rug check if real data is fetched.
+    document.getElementById("marketsBody").innerHTML = "";
   });
 
   async function rugCheck() {
@@ -353,7 +333,7 @@
     connection = new solanaWeb3.Connection(RPC_ENDPOINT);
 
     try {
-      // Look up token info in token list
+      // Look up token info from the token list
       const tokenEntry = tokenList.find(t => t.address === fullAddress);
       if (tokenEntry) {
         document.getElementById("tokenName").textContent = tokenEntry.name || "Unknown";
@@ -375,7 +355,7 @@
         document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
       }
 
-      // Fetch on-chain info
+      // Fetch on-chain token info
       const parsedInfo = await connection.getParsedAccountInfo(publicKey);
       let isMint = false;
       let isTokenAccount = false;
@@ -419,7 +399,6 @@
       document.getElementById("freezeAuth").textContent = (freezeAuth === "None") ? "Secure" : "Insecure";
       document.getElementById("freezeAuth").className = (freezeAuth === "None") ? "secure-label" : "insecure-label";
 
-      // Score calculation
       const { score, statusLabel, lowCount, medCount, highCount } = computeScoreAndRisk({
         isMint, isTokenAccount, supply, mintAuth, freezeAuth
       });
@@ -430,16 +409,52 @@
       document.getElementById("riskMed").textContent = medCount;
       document.getElementById("riskHigh").textContent = highCount;
 
-      // If it's a mint, fetch top holders
-      if (isMint) {
+      // If it's a mint, fetch market data from Dexscreener and top holders
+      if (isMint && decimals) {
+        const dexscreenerData = await fetchDexscreenerData(fullAddress);
+        if (dexscreenerData && dexscreenerData.pairs && dexscreenerData.pairs.length > 0) {
+          // Map Dexscreener pairs to our table format
+          const markets = dexscreenerData.pairs.map(pair => {
+            // Use baseToken and targetToken symbols to build pair info
+            const pairStr = pair.baseToken && pair.targetToken
+              ? `${pair.baseToken.symbol}/${pair.targetToken.symbol}`
+              : "N/A";
+            return {
+              market: pair.market || "Dex",
+              address: pair.address || "N/A",
+              pair: pairStr,
+              lpMint: pair.lpMint || "N/A",
+              liquidity: pair.liquidity ? "$" + pair.liquidity.toLocaleString() : "N/A",
+              price: pair.priceUsd || "N/A"
+            };
+          });
+          populateMarketsTable(markets);
+        } else {
+          populateMarketsTable([]);
+        }
+        // Fetch top holders data on-chain
         const topHolders = await fetchTopHolders(connection, fullAddress);
         populateHoldersTable(topHolders);
       } else {
+        document.getElementById("marketsBody").innerHTML = "";
         document.getElementById("holdersBody").innerHTML = "";
       }
     } catch (err) {
       console.error(err);
       alert("Error fetching token info. Check console.");
+    }
+  }
+
+  // Fetch Dexscreener data for a given mint address
+  async function fetchDexscreenerData(mintAddress) {
+    const url = `https://api.dexscreener.com/latest/dex/tokens/solana/${mintAddress}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error("Error fetching Dexscreener data:", err);
+      return null;
     }
   }
 
@@ -449,12 +464,7 @@
     const accounts = await conn.getParsedProgramAccounts(TOKEN_PROGRAM_ID, {
       filters: [
         { dataSize: 165 },
-        {
-          memcmp: {
-            offset: 0,
-            bytes: mintPubKey.toBase58()
-          }
-        }
+        { memcmp: { offset: 0, bytes: mintPubKey.toBase58() } }
       ]
     });
     const holders = accounts.map(({ account }) => {
@@ -486,7 +496,6 @@
     });
   }
 
-  // Populate Markets table with placeholder data
   function populateMarketsTable(markets) {
     const marketsBody = document.getElementById("marketsBody");
     marketsBody.innerHTML = "";
@@ -510,7 +519,7 @@
     });
   }
 
-  // Scoring logic (placeholder)
+  // Placeholder scoring logic
   function computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuth, freezeAuth }) {
     let score = 50;
     let statusLabel = "Medium Risk";
