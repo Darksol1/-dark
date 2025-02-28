@@ -11,7 +11,6 @@
       color: #fff;
       font-family: Arial, sans-serif;
     }
-    /* Container for both panels */
     .container {
       max-width: 1200px;
       margin: 2rem auto;
@@ -59,7 +58,7 @@
       background-color: #218838;
     }
 
-    /* Left Panel (Token Info) */
+    /* Panels */
     .token-header {
       display: flex; 
       align-items: center; 
@@ -90,12 +89,7 @@
       font-weight: bold;
     }
 
-    /* Right Panel (Analysis) */
-    .right-panel h2 {
-      color: #28a745;
-      margin-top: 0;
-      margin-bottom: 1rem;
-    }
+    /* Analysis Panel */
     .analysis-score {
       display: flex; 
       align-items: center; 
@@ -148,13 +142,49 @@
       background: #dc3545;
     }
 
+    /* New: Markets + Top Holders container */
+    .bottom-container {
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      padding: 0 1rem;
+    }
+    .markets-panel, .holders-panel {
+      background: #151515;
+      border-radius: 8px;
+      padding: 1.5rem;
+      flex: 1 1 300px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.5rem;
+      border-bottom: 1px solid #333;
+    }
+    th {
+      color: #28a745;
+      font-weight: bold;
+    }
+    td {
+      color: #ccc;
+    }
+
     /* Responsive */
     @media(max-width: 800px) {
       .analysis-score {
         flex-direction: column; 
         align-items: flex-start;
       }
-      .container {
+      .container, .bottom-container {
         flex-direction: column;
       }
     }
@@ -168,9 +198,8 @@
   <button onclick="rugCheck()">Rug Check</button>
 </div>
 
-<!-- Main Container -->
+<!-- Main Container (Top Panels) -->
 <div class="container">
-
   <!-- Left Panel: Token Info -->
   <div class="left-panel">
     <div class="token-header">
@@ -183,9 +212,6 @@
       <p><strong>Mint Authority:</strong> <span id="mintAuth">--</span></p>
       <p><strong>Freeze Authority:</strong> <span id="freezeAuth">--</span></p>
       <p><strong>Social Links:</strong> <span id="socialLinks">No info found</span></p>
-
-      <!-- NEW: Dev Sold line -->
-      <p><strong>Dev Sold:</strong> <span id="devSold">N/A</span></p>
     </div>
   </div>
 
@@ -208,7 +234,46 @@
       </div>
     </div>
   </div>
+</div>
 
+<!-- Bottom Container (Markets + Top Holders) -->
+<div class="bottom-container">
+  <!-- Markets Panel -->
+  <div class="markets-panel">
+    <h2>Markets (<span id="marketsCount">0</span>)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Market</th>
+          <th>Address</th>
+          <th>Pair</th>
+          <th>LP Mint</th>
+          <th>Liquidity</th>
+          <th>LP Locked</th>
+        </tr>
+      </thead>
+      <tbody id="marketsBody">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Top Holders Panel -->
+  <div class="holders-panel">
+    <h2>Top Holders</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Amount</th>
+          <th>Percentage</th>
+        </tr>
+      </thead>
+      <tbody id="holdersBody">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <!-- Pull in Solana Web3.js library -->
@@ -217,15 +282,41 @@
 <script>
   // Your Helius RPC Endpoint
   const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
-  
-  // The "Dev" or "First Buyer" wallet address you want to check
-  // Replace with the actual public key
-  const DEV_WALLET_ADDRESS = "4z5N...REPLACE_WITH_ACTUAL_WALLET";
 
   // We'll load the official Solana Token List on page load
   let tokenList = [];
   let tokenListLoaded = false;
 
+  // Placeholder data for markets + top holders
+  // In a real app, you'd fetch this from a DeFi aggregator or on-chain analysis.
+  const marketsData = [
+    {
+      market: "Market1",
+      address: "F1r5tAd...ess",
+      pair: "SOL / USDC",
+      lpMint: "LPxxx...123",
+      liquidity: "$17,000",
+      lpLocked: "100.00%"
+    },
+    {
+      market: "Market2",
+      address: "S3c0nD...dress",
+      pair: "SOL / MEME",
+      lpMint: "LPyyy...789",
+      liquidity: "$0",
+      lpLocked: "100.00%"
+    }
+  ];
+
+  const holdersData = [
+    { account: "Bxyr...W", amount: "345M", percentage: "36.7%" },
+    { account: "79pm...xx", amount: "35M", percentage: "3.5%" },
+    { account: "Ghsh...VwL", amount: "22M", percentage: "2.2%" },
+    { account: "6NUr...ey", amount: "999k", percentage: "0.9%" },
+    { account: "HTad...abc", amount: "500k", percentage: "0.5%" }
+  ];
+
+  // Load token list on page load
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const res = await fetch("https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json");
@@ -236,15 +327,51 @@
     } catch (err) {
       console.error("Error loading token list:", err);
     }
+
+    // For demo: fill markets + holders placeholders right away
+    populateMarketsAndHolders();
   });
 
+  // Fills the "Markets" and "Top Holders" tables with placeholder data
+  function populateMarketsAndHolders() {
+    // Markets
+    document.getElementById("marketsCount").textContent = marketsData.length;
+    const marketsBody = document.getElementById("marketsBody");
+    marketsBody.innerHTML = ""; // Clear old rows
+    marketsData.forEach(m => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${m.market}</td>
+        <td>${m.address}</td>
+        <td>${m.pair}</td>
+        <td>${m.lpMint}</td>
+        <td>${m.liquidity}</td>
+        <td>${m.lpLocked}</td>
+      `;
+      marketsBody.appendChild(row);
+    });
+
+    // Top Holders
+    const holdersBody = document.getElementById("holdersBody");
+    holdersBody.innerHTML = "";
+    holdersData.forEach(h => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${h.account}</td>
+        <td>${h.amount}</td>
+        <td>${h.percentage}</td>
+      `;
+      holdersBody.appendChild(row);
+    });
+  }
+
+  // Main "Rug Check" logic
+  let tokenConnection;
   async function rugCheck() {
-    // If token list isn't loaded, let the user know
     if (!tokenListLoaded) {
       alert("Still loading the token list. Please wait a moment and try again!");
       return;
     }
-
     const inputAddr = document.getElementById('tokenAddress').value.trim();
     if (!inputAddr) {
       alert("Please enter a token address!");
@@ -262,7 +389,7 @@
     // Reset UI
     resetUI(fullAddress);
 
-    const connection = new solanaWeb3.Connection(RPC_ENDPOINT);
+    tokenConnection = new solanaWeb3.Connection(RPC_ENDPOINT);
 
     try {
       // Attempt to find a token entry for the logo + name
@@ -302,7 +429,7 @@
       }
 
       // Let's fetch on-chain info
-      const parsedInfo = await connection.getParsedAccountInfo(publicKey);
+      const parsedInfo = await tokenConnection.getParsedAccountInfo(publicKey);
 
       let isMint = false;
       let isTokenAccount = false;
@@ -323,12 +450,14 @@
         } else if (type === "account") {
           // It's a token holding account
           isTokenAccount = true;
+          // If you want the mint supply, you'd fetch getTokenSupply(info.mint)
+          // For now, partial data only
           mintAuth   = "(See Mint)";
           freezeAuth = "(See Mint)";
         }
       } else {
         // If not recognized as SPL token, fetch raw info
-        const rawInfo = await connection.getAccountInfo(publicKey);
+        const rawInfo = await tokenConnection.getAccountInfo(publicKey);
         if (!rawInfo) {
           console.log("No data found for", fullAddress);
         }
@@ -336,13 +465,13 @@
 
       // If it's a mint, get more accurate supply
       if (isMint) {
-        const tokenSupply = await connection.getTokenSupply(publicKey);
+        const tokenSupply = await tokenConnection.getTokenSupply(publicKey);
         if (tokenSupply.value) {
           supply = tokenSupply.value.amount;
         }
       }
 
-      // Update left panel
+      // Update the left panel
       document.getElementById("tokenAddr").textContent    = shortenAddress(fullAddress);
       document.getElementById("tokenAddr").title          = fullAddress;
       document.getElementById("tokenSupply").textContent  = formatNumber(supply);
@@ -369,52 +498,13 @@
       document.getElementById("riskMed").textContent  = medCount;
       document.getElementById("riskHigh").textContent = highCount;
 
-      // NEW: Check if dev wallet sold
-      if (isMint) {
-        await checkDevSold(fullAddress, connection);
-      } else {
-        // If it's not a mint, we can't do a direct minted token check
-        // We'll just say "N/A" or something
-        document.getElementById("devSold").textContent = "N/A (Not a mint)";
-      }
+      // If you want to dynamically load real markets + top holders for the token,
+      // you’d call some aggregator or your own logic here.
+      // For now, we rely on the placeholders shown by default.
 
     } catch (err) {
       console.error(err);
       alert("Error fetching token info. Check console.");
-    }
-  }
-
-  // Check if the dev wallet still holds the token
-  async function checkDevSold(mintAddress, connection) {
-    let devSoldEl = document.getElementById("devSold");
-    try {
-      // Convert dev wallet + mint to PublicKeys
-      const devPublicKey  = new solanaWeb3.PublicKey(DEV_WALLET_ADDRESS);
-      const mintPublicKey = new solanaWeb3.PublicKey(mintAddress);
-
-      // Filter by the mint (so we only get token accounts for this mint)
-      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
-        devPublicKey,
-        { mint: mintPublicKey }
-      );
-
-      if (!tokenAccounts.value || tokenAccounts.value.length === 0) {
-        // Dev wallet has no token account for this mint => sold or never had it
-        devSoldEl.textContent = "Yes (No account in dev wallet)";
-        return;
-      }
-
-      // If we found an account, check the balance
-      const acctData = tokenAccounts.value[0].account.data.parsed.info;
-      const amount   = acctData.tokenAmount?.uiAmount || 0;
-      if (amount > 0) {
-        devSoldEl.textContent = "No (Still holding)";
-      } else {
-        devSoldEl.textContent = "Yes (Balance is zero)";
-      }
-    } catch (err) {
-      console.error("Error checking dev sold:", err);
-      devSoldEl.textContent = "Unknown";
     }
   }
 
@@ -488,9 +578,6 @@
     document.getElementById("riskLow").textContent  = "0";
     document.getElementById("riskMed").textContent  = "0";
     document.getElementById("riskHigh").textContent = "0";
-
-    // Reset the "Dev Sold" line
-    document.getElementById("devSold").textContent = "N/A";
   }
 
   // Shorten address to e.g. "mo7m...Wi5N"
