@@ -215,31 +215,35 @@
   // Your Helius RPC Endpoint
   const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
   
-  // We load the official Solana Token List for logos/names + possible social links
+  // Official token list + loaded flag
   let tokenList = [];
+  let tokenListLoaded = false;
 
-  async function loadTokenList() {
+  // 1) Load the token list on page load
+  window.addEventListener("DOMContentLoaded", async () => {
     try {
       const res = await fetch("https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json");
       const data = await res.json();
       tokenList = data.tokens || [];
+      tokenListLoaded = true;
       console.log("Token list loaded. Count:", tokenList.length);
     } catch (err) {
       console.error("Error loading token list:", err);
     }
-  }
+  });
 
-  // On page load, fetch the token list
-  window.addEventListener("DOMContentLoaded", loadTokenList);
-
+  // 2) When user clicks "Rug Check," ensure the list is loaded
   async function rugCheck() {
+    if (!tokenListLoaded) {
+      alert("Still loading the token list. Please wait a moment and try again!");
+      return;
+    }
     const inputAddr = document.getElementById('tokenAddress').value.trim();
     if (!inputAddr) {
       alert("Please enter a token address!");
       return;
     }
-    // Convert to a PublicKey and then back to a full Base58 string
-    // This ensures we match the token list exactly
+
     let publicKey;
     try {
       publicKey = new solanaWeb3.PublicKey(inputAddr);
@@ -261,6 +265,7 @@
       if (tokenEntry) {
         document.getElementById("tokenName").textContent = tokenEntry.name || "Unknown";
         document.getElementById("tokenLogo").src = tokenEntry.logoURI || "https://via.placeholder.com/48/333/fff?text=No+Logo";
+        
         // Attempt to parse social links from "extensions"
         if (tokenEntry.extensions) {
           const ex = tokenEntry.extensions;
@@ -269,7 +274,6 @@
             links.push(`<a href="${ex.website}" target="_blank">Website</a>`);
           }
           if (ex.twitter) {
-            // If it's just a handle, link to twitter.com/handle
             const twitterHandle = ex.twitter.replace('@','');
             links.push(`<a href="https://twitter.com/${twitterHandle}" target="_blank">Twitter</a>`);
           }
@@ -279,7 +283,6 @@
           if (ex.telegram) {
             links.push(`<a href="${ex.telegram}" target="_blank">Telegram</a>`);
           }
-          // If we have any links, show them
           if (links.length > 0) {
             document.getElementById("socialLinks").innerHTML = links.join(" | ");
           } else {
@@ -314,8 +317,6 @@
         } else if (type === "account") {
           // It's a token holding account
           isTokenAccount = true;
-          // If you want the mint supply, you'd fetch getTokenSupply(info.mint)
-          // For now, partial data only
           mintAuth   = "(See Mint)";
           freezeAuth = "(See Mint)";
         }
@@ -373,16 +374,15 @@
   function computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuth, freezeAuth }) {
     let score = 50;
     let statusLabel = "Medium Risk";
-
     let lowCount = 0, medCount = 0, highCount = 0;
 
     if (isMint) {
       if (mintAuth === "None") {
-        score += 30; // more trust
+        score += 30; 
         lowCount += 1;
       } else {
         score -= 20;
-        highCount += 1; // active mint authority is high risk
+        highCount += 1;
       }
       if (freezeAuth === "None") {
         score += 10;
@@ -395,7 +395,6 @@
       score -= 5;
       medCount += 1;
     } else {
-      // Not recognized as SPL token
       score -= 10;
       highCount += 1;
     }
@@ -411,7 +410,6 @@
       }
     }
 
-    // Bound the score
     if (score < 0)   score = 0;
     if (score > 100) score = 100;
 
