@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Solana Rug Checker</title>
 </head>
 <body style="background:#111; color:#fff; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; padding:20px;">
@@ -10,32 +9,43 @@
   <p>Enter a token address below:</p>
   
   <div style="display:flex; gap:10px;">
-    <input id="tokenAddress" type="text" placeholder="Enter token address" style="padding:5px;"/>
+    <input
+      id="tokenAddress"
+      type="text"
+      placeholder="Enter token address"
+      style="padding:5px;"
+    />
     <button onclick="checkToken()">Rug Check</button>
   </div>
 
   <div id="result" style="margin-top:20px;"></div>
 
-  <!-- Include the Solana Web3.js library from a CDN (for quick testing) -->
+  <!-- Pull in the Solana Web3.js library from unpkg or jsDelivr -->
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-  
+  <!-- Alternative: <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.js"></script> -->
+
   <script>
     async function checkToken() {
       const address = document.getElementById('tokenAddress').value.trim();
       const resultDiv = document.getElementById('result');
 
+      // If no address is entered, stop here
       if (!address) {
         alert('Please enter a token address!');
         return;
       }
 
-      // Connect to Solana mainnet-beta
-      const connection = new solanaWeb3.Connection(
-        solanaWeb3.clusterApiUrl('mainnet-beta')
-      );
+      // Use a custom Solana RPC endpoint to avoid 403 from the default
+      // GenesysGo endpoint:
+      const RPC_ENDPOINT = "https://ssc-dao.genesysgo.net/";
+      // You can also use a free endpoint from a provider like QuickNode or Alchemy
+      // Example:
+      // const RPC_ENDPOINT = "https://quiet-long-frost.solana-mainnet.discover.quiknode.pro/YOUR-API-KEY/";
+
+      const connection = new solanaWeb3.Connection(RPC_ENDPOINT);
 
       try {
-        // Convert user input to a PublicKey
+        // Convert user input into a PublicKey
         const publicKey = new solanaWeb3.PublicKey(address);
 
         // Fetch basic info about this account
@@ -43,20 +53,18 @@
 
         // If no data is found, inform the user
         if (!accountInfo.value) {
-          resultDiv.innerText = `No data found for ${address}. Are you sure this is correct?`;
+          resultDiv.innerText = `No data found for ${address}.`;
           return;
         }
 
-        // Extract some details
-        const data = accountInfo.value.data;
+        // Display some basic info about the account
+        const data  = accountInfo.value.data;
         const owner = data?.parsed?.info?.owner || 'N/A';
         const type  = data?.parsed?.type  || 'N/A';
-
-        // Show results
         resultDiv.innerText = `Owner: ${owner}\nType: ${type}`;
 
-        // Here is where you would add more "rug check" logic,
-        // e.g. checking mint authority, freeze authority, top holders, etc.
+        // Note: For a full "rug check," you’d fetch more data, e.g. mint authority,
+        // freeze authority, top holders, etc. This is just a starting point.
 
       } catch (error) {
         console.error(error);
