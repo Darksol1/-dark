@@ -183,6 +183,9 @@
       <p><strong>Mint Authority:</strong> <span id="mintAuth">--</span></p>
       <p><strong>Freeze Authority:</strong> <span id="freezeAuth">--</span></p>
       <p><strong>Social Links:</strong> <span id="socialLinks">No info found</span></p>
+
+      <!-- NEW: Dev Sold line -->
+      <p><strong>Dev Sold:</strong> <span id="devSold">N/A</span></p>
     </div>
   </div>
 
@@ -215,11 +218,14 @@
   // Your Helius RPC Endpoint
   const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
   
-  // Official token list + loaded flag
+  // The "Dev" or "First Buyer" wallet address you want to check
+  // Replace with the actual public key
+  const DEV_WALLET_ADDRESS = "4z5N...REPLACE_WITH_ACTUAL_WALLET";
+
+  // We'll load the official Solana Token List on page load
   let tokenList = [];
   let tokenListLoaded = false;
 
-  // 1) Load the token list on page load
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const res = await fetch("https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json");
@@ -232,18 +238,18 @@
     }
   });
 
-  // 2) When user clicks "Rug Check," ensure the list is loaded
   async function rugCheck() {
+    // If token list isn't loaded, let the user know
     if (!tokenListLoaded) {
       alert("Still loading the token list. Please wait a moment and try again!");
       return;
     }
+
     const inputAddr = document.getElementById('tokenAddress').value.trim();
     if (!inputAddr) {
       alert("Please enter a token address!");
       return;
     }
-
     let publicKey;
     try {
       publicKey = new solanaWeb3.PublicKey(inputAddr);
@@ -336,7 +342,7 @@
         }
       }
 
-      // Update the left panel
+      // Update left panel
       document.getElementById("tokenAddr").textContent    = shortenAddress(fullAddress);
       document.getElementById("tokenAddr").title          = fullAddress;
       document.getElementById("tokenSupply").textContent  = formatNumber(supply);
@@ -363,9 +369,52 @@
       document.getElementById("riskMed").textContent  = medCount;
       document.getElementById("riskHigh").textContent = highCount;
 
+      // NEW: Check if dev wallet sold
+      if (isMint) {
+        await checkDevSold(fullAddress, connection);
+      } else {
+        // If it's not a mint, we can't do a direct minted token check
+        // We'll just say "N/A" or something
+        document.getElementById("devSold").textContent = "N/A (Not a mint)";
+      }
+
     } catch (err) {
       console.error(err);
       alert("Error fetching token info. Check console.");
+    }
+  }
+
+  // Check if the dev wallet still holds the token
+  async function checkDevSold(mintAddress, connection) {
+    let devSoldEl = document.getElementById("devSold");
+    try {
+      // Convert dev wallet + mint to PublicKeys
+      const devPublicKey  = new solanaWeb3.PublicKey(DEV_WALLET_ADDRESS);
+      const mintPublicKey = new solanaWeb3.PublicKey(mintAddress);
+
+      // Filter by the mint (so we only get token accounts for this mint)
+      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+        devPublicKey,
+        { mint: mintPublicKey }
+      );
+
+      if (!tokenAccounts.value || tokenAccounts.value.length === 0) {
+        // Dev wallet has no token account for this mint => sold or never had it
+        devSoldEl.textContent = "Yes (No account in dev wallet)";
+        return;
+      }
+
+      // If we found an account, check the balance
+      const acctData = tokenAccounts.value[0].account.data.parsed.info;
+      const amount   = acctData.tokenAmount?.uiAmount || 0;
+      if (amount > 0) {
+        devSoldEl.textContent = "No (Still holding)";
+      } else {
+        devSoldEl.textContent = "Yes (Balance is zero)";
+      }
+    } catch (err) {
+      console.error("Error checking dev sold:", err);
+      devSoldEl.textContent = "Unknown";
     }
   }
 
@@ -439,6 +488,9 @@
     document.getElementById("riskLow").textContent  = "0";
     document.getElementById("riskMed").textContent  = "0";
     document.getElementById("riskHigh").textContent = "0";
+
+    // Reset the "Dev Sold" line
+    document.getElementById("devSold").textContent = "N/A";
   }
 
   // Shorten address to e.g. "mo7m...Wi5N"
