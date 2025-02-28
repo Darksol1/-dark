@@ -2,117 +2,306 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Solana Rug Checker (Helius)</title>
-</head>
-<body style="background:#111; color:#fff; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; padding:20px;">
-  <h1>Solana Rug Checker (using Helius RPC)</h1>
-  <p>Enter a Solana address (token mint, associated token account, or wallet):</p>
-  
-  <div style="display:flex; gap:10px;">
-    <input
-      id="tokenAddress"
-      type="text"
-      placeholder="Enter any Solana address"
-      style="padding:5px;"
-    />
-    <button onclick="checkToken()">Rug Check</button>
-  </div>
+  <title>Solana Rug Checker</title>
+  <style>
+    body {
+      margin: 0; padding: 0; background-color: #0f0f0f; color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; background: #151515;
+    }
+    header .logo {
+      display: flex; align-items: center; gap: 1rem;
+    }
+    header .logo img {
+      width: 40px; height: 40px; border-radius: 50%;
+    }
+    header nav ul {
+      display: flex; gap: 1rem; list-style: none; margin: 0; padding: 0;
+    }
+    header nav a {
+      color: #ccc; text-decoration: none; font-weight: bold;
+    }
+    header nav a:hover {
+      color: #fff;
+    }
 
-  <div id="result" style="margin-top:20px; white-space:pre; font-family:monospace;"></div>
+    .main-container {
+      max-width: 1200px; margin: 2rem auto; padding: 0 1rem;
+    }
+    .search-bar {
+      display: flex; gap: 1rem; margin-bottom: 2rem;
+    }
+    .search-bar input {
+      flex: 1; padding: 0.75rem; font-size: 1rem; border-radius: 6px;
+      border: 1px solid #333; background-color: #1c1c1c; color: #fff;
+    }
+    .search-bar button {
+      padding: 0.75rem 1.5rem; border: none; border-radius: 6px;
+      background-color: #28a745; color: #fff; font-size: 1rem;
+      cursor: pointer; transition: background 0.3s;
+    }
+    .search-bar button:hover {
+      background-color: #218838;
+    }
 
-  <!-- Load the Solana Web3.js library from unpkg or jsDelivr -->
-  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    .results-container {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;
+    }
+    .box {
+      background: #151515; padding: 1.5rem; border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .box h2 {
+      margin-top: 0; margin-bottom: 1rem;
+      font-size: 1.2rem; color: #28a745;
+    }
+    .token-info p {
+      margin: 0.3rem 0;
+    }
+    /* Score circle */
+    .score-circle {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: #333; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: bold; margin: 1rem auto;
+    }
+    .score-label {
+      text-align: center; font-size: 1.1rem; margin-bottom: 1rem;
+    }
+    .risk-level {
+      font-weight: bold; color: #ffc107; margin-bottom: 1rem;
+    }
+    .risk-level.high { color: #dc3545; }
+    .risk-level.safe { color: #28a745; }
 
-  <script>
-    // Replace with your personal Helius RPC endpoint:
-    // e.g. "https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY"
-    const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
-
-    async function checkToken() {
-      const addressInput = document.getElementById('tokenAddress');
-      const resultDiv = document.getElementById('result');
-      const address = addressInput.value.trim();
-
-      // Clear previous results
-      resultDiv.textContent = "";
-
-      if (!address) {
-        alert('Please enter a Solana address!');
-        return;
-      }
-
-      // Connect to Helius
-      const connection = new solanaWeb3.Connection(RPC_ENDPOINT);
-
-      try {
-        const publicKey = new solanaWeb3.PublicKey(address);
-
-        // Attempt getParsedAccountInfo first (works for SPL token mints & token accounts)
-        const parsedInfo = await connection.getParsedAccountInfo(publicKey);
-
-        if (parsedInfo.value) {
-          const parsedData = parsedInfo.value.data;
-          if (parsedData && parsedData.parsed) {
-            // "type" can be "mint" (for a token mint) or "account" (for a token holding account)
-            const accountType = parsedData.parsed.type || 'N/A';
-            const info = parsedData.parsed.info || {};
-
-            if (accountType === 'mint') {
-              // Show mint details
-              const mintAuthority   = info.mintAuthority   || 'None';
-              const freezeAuthority = info.freezeAuthority || 'None';
-              const decimals        = info.decimals;
-              const supply          = info.supply;
-              resultDiv.textContent =
-                `SPL Token Mint Info:\n` +
-                `Mint Authority:   ${mintAuthority}\n` +
-                `Freeze Authority: ${freezeAuthority}\n` +
-                `Decimals:         ${decimals}\n` +
-                `Supply:           ${supply}`;
-              return;
-            } else if (accountType === 'account') {
-              // This is a token holding account
-              // Typically "info.owner" is the wallet that owns this token account
-              const owner      = info.owner || 'N/A';
-              const tokenAmount = info.tokenAmount;
-              const amount     = tokenAmount?.amount;
-              const decimals   = tokenAmount?.decimals;
-              resultDiv.textContent =
-                `SPL Token Account Info:\n` +
-                `Owner (wallet): ${owner}\n` +
-                `Balance:        ${amount}\n` +
-                `Decimals:       ${decimals}`;
-              return;
-            } else {
-              // Some other SPL token type
-              resultDiv.textContent =
-                `SPL Token Account Info:\nType: ${accountType}\n(No additional data)`;
-              return;
-            }
-          }
-        }
-
-        // If we reach here, it's not a parsed SPL token or there's no data
-        // So let's fetch raw info
-        const rawInfo = await connection.getAccountInfo(publicKey);
-        if (!rawInfo) {
-          resultDiv.textContent = `No data found for ${address}.`;
-          return;
-        }
-
-        const ownerProgram = rawInfo.owner.toBase58();
-        const dataSize = rawInfo.data.length;
-        const isExecutable = rawInfo.executable;
-        resultDiv.textContent =
-          `Raw Account Info:\n` +
-          `Owner Program: ${ownerProgram}\n` +
-          `Data Size:     ${dataSize} bytes\n` +
-          `Executable:    ${isExecutable}`;
-      } catch (error) {
-        console.error(error);
-        resultDiv.textContent = 'Error fetching token info. Check console.\n' + error;
+    /* Responsive */
+    @media(max-width: 900px) {
+      .results-container {
+        grid-template-columns: 1fr;
       }
     }
-  </script>
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="https://rugchecker.com/_next/image?url=%2Flogo.png&w=64&q=75" alt="Logo">
+    <span style="color:#fff; font-size:1.2rem; font-weight:bold;">Solana Rug Checker</span>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Tokens</a></li>
+      <li><a href="#">Support Us</a></li>
+      <li><a href="https://twitter.com/AndyCharle1994" target="_blank" rel="nofollow">Follow Twitter</a></li>
+      <li><a href="#">English</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div class="main-container">
+  <div class="search-bar">
+    <input id="tokenAddress" type="text" placeholder="token address here" />
+    <button onclick="rugCheck()">Rug Check</button>
+  </div>
+
+  <div class="results-container">
+    <!-- Token Info -->
+    <div class="box token-info">
+      <h2>Token Info</h2>
+      <p><strong>Token Address:</strong> <span id="tokenAddr"></span></p>
+      <p><strong>Supply:</strong> <span id="tokenSupply"></span></p>
+      <p><strong>Mint Authority:</strong> <span id="mintAuth"></span></p>
+      <p><strong>Freeze Authority:</strong> <span id="freezeAuth"></span></p>
+      <p><strong>Social Links:</strong> <span id="socialLinks">No info found</span></p>
+    </div>
+
+    <!-- Token Safety Analysis -->
+    <div class="box center-box">
+      <h2>Token Safety Analysis</h2>
+      <div class="score-circle" id="scoreCircle">--</div>
+      <div class="score-label" id="scoreLabel">Score: --/100</div>
+      <div id="safetyStatus" style="text-align:center;">Unknown</div>
+    </div>
+
+    <!-- Risk Factors -->
+    <div class="box">
+      <h2>Risk Factors</h2>
+      <div class="risk-level" id="riskLevel">No analysis yet</div>
+      <ul id="riskList"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- Pull in the Solana Web3.js library from unpkg or jsDelivr -->
+<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+<script>
+  // Replace with your Helius endpoint (be mindful if you shared your API key publicly)
+  const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
+
+  async function rugCheck() {
+    const address = document.getElementById('tokenAddress').value.trim();
+    if (!address) {
+      alert("Please enter a token address!");
+      return;
+    }
+    // Reset fields
+    document.getElementById('tokenAddr').textContent   = address;
+    document.getElementById('tokenSupply').textContent = "--";
+    document.getElementById('mintAuth').textContent    = "--";
+    document.getElementById('freezeAuth').textContent  = "--";
+    document.getElementById('socialLinks').textContent = "No info found";
+    document.getElementById('scoreCircle').textContent = "--";
+    document.getElementById('scoreLabel').textContent  = "Score: --/100";
+    document.getElementById('safetyStatus').textContent= "Unknown";
+    document.getElementById('riskLevel').textContent   = "No analysis yet";
+    document.getElementById('riskList').innerHTML      = "";
+
+    const connection = new solanaWeb3.Connection(RPC_ENDPOINT);
+    try {
+      const publicKey = new solanaWeb3.PublicKey(address);
+      const parsedInfo = await connection.getParsedAccountInfo(publicKey);
+
+      let isMint = false;
+      let isTokenAccount = false;
+      let supply = "--";
+      let mintAuth = "None";
+      let freezeAuth = "None";
+
+      // Check if we got parsed data
+      if (parsedInfo.value && parsedInfo.value.data && parsedInfo.value.data.parsed) {
+        const info = parsedInfo.value.data.parsed.info;
+        const type = parsedInfo.value.data.parsed.type;
+        
+        if (type === "mint") {
+          // It's a token mint
+          isMint = true;
+          supply       = info.supply;
+          mintAuth     = info.mintAuthority   || "None";
+          freezeAuth   = info.freezeAuthority || "None";
+        } else if (type === "account") {
+          // It's a token holding account
+          isTokenAccount = true;
+          // If you want supply, you'd need to get the mint from 'info.mint' and fetch that separately
+          // For now, we just display partial data
+          // supply = ??? (We could fetch the mint info separately if needed)
+          mintAuth     = "(See Mint)";
+          freezeAuth   = "(See Mint)";
+        }
+      } else {
+        // Fallback: get raw info (e.g. system account)
+        const rawInfo = await connection.getAccountInfo(publicKey);
+        if (!rawInfo) {
+          // No data
+          console.log("No data found for", address);
+        }
+      }
+
+      // If it's a mint, let's fetch more details with getTokenSupply
+      if (isMint) {
+        const tokenSupply = await connection.getTokenSupply(publicKey);
+        if (tokenSupply.value) {
+          supply = tokenSupply.value.amount;
+        }
+      }
+
+      // Update UI
+      document.getElementById('tokenSupply').textContent = supply;
+      document.getElementById('mintAuth').textContent    = mintAuth;
+      document.getElementById('freezeAuth').textContent  = freezeAuth;
+
+      // Compute a "score" & risk factors
+      const { score, riskLabel, riskFactors, statusLabel } = computeScoreAndRisk({
+        isMint,
+        isTokenAccount,
+        supply,
+        mintAuthority: mintAuth,
+        freezeAuthority: freezeAuth
+      });
+
+      // Update visuals
+      document.getElementById('scoreCircle').textContent = score;
+      document.getElementById('scoreLabel').textContent  = `Score: ${score}/100`;
+      document.getElementById('safetyStatus').textContent= statusLabel;
+
+      const riskEl = document.getElementById('riskLevel');
+      riskEl.textContent = riskLabel;
+      riskEl.className = "risk-level";
+      if (riskLabel === "High Risk") riskEl.classList.add("high");
+      else if (riskLabel === "Safe") riskEl.classList.add("safe");
+
+      // Populate risk list
+      const riskList = document.getElementById('riskList');
+      riskFactors.forEach(f => {
+        const li = document.createElement('li');
+        li.textContent = f;
+        riskList.appendChild(li);
+      });
+
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching token info. Check console.");
+    }
+  }
+
+  // A simple function that returns a "score" and some risk factor labels
+  function computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuthority, freezeAuthority }) {
+    let score = 50; // Start from 50
+    let riskFactors = [];
+
+    // If it's a mint with 'None' authority, we assume it's safer
+    if (isMint) {
+      if (mintAuthority === "None") {
+        score += 30;
+      } else {
+        riskFactors.push("Mint authority is active (possible future minting).");
+        score -= 20;
+      }
+      if (freezeAuthority === "None") {
+        score += 10;
+      } else {
+        riskFactors.push("Freeze authority is active (can freeze tokens).");
+        score -= 10;
+      }
+    } else if (isTokenAccount) {
+      // We didn't fetch actual supply for a token account
+      riskFactors.push("This is a token account, not a mint. Can't verify mint settings here.");
+      score -= 5;
+    } else {
+      riskFactors.push("Not recognized as a token mint or token account.");
+      score -= 10;
+    }
+
+    // If supply is huge, we consider it more suspicious? Arbitrary logic:
+    const numericSupply = parseFloat(supply);
+    if (!isNaN(numericSupply)) {
+      if (numericSupply > 1000000000) {
+        riskFactors.push("Very large supply (could be inflationary).");
+        score -= 10;
+      } else {
+        score += 5;
+      }
+    }
+
+    // Bound the score
+    if (score < 0) score = 0;
+    if (score > 100) score = 100;
+
+    let riskLabel = "Medium Risk";
+    let statusLabel = "Caution";
+    if (score >= 80) {
+      riskLabel = "Safe";
+      statusLabel = "Safe";
+    } else if (score < 50) {
+      riskLabel = "High Risk";
+      statusLabel = "High Risk";
+    }
+
+    return { score, riskLabel, riskFactors, statusLabel };
+  }
+</script>
 </body>
 </html>
