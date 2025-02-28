@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Solana Rug Checker</title>
+  <title>Solana Rug Checker (Helius)</title>
 </head>
 <body style="background:#111; color:#fff; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; padding:20px;">
-  <h1>Solana Rug Checker (Hybrid Parsing)</h1>
+  <h1>Solana Rug Checker (using Helius RPC)</h1>
   <p>Enter a Solana address (token mint, associated token account, or wallet):</p>
   
   <div style="display:flex; gap:10px;">
@@ -20,44 +20,40 @@
 
   <div id="result" style="margin-top:20px; white-space:pre; font-family:monospace;"></div>
 
-  <!-- Pull in the Solana Web3.js library from unpkg or jsDelivr -->
+  <!-- 1) Load the Solana Web3.js library from a CDN -->
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-  <!-- Alternative: <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.js"></script> -->
-
+  
   <script>
-    // Custom RPC endpoint to avoid default clusterApiUrl 403
-    const RPC_ENDPOINT = "https://rpc.ankr.com/solana";
-    // You can swap for other endpoints if you get blocked again:
-    // "https://solana-api.projectserum.com"
-    // "https://api.metaplex.solana.com"
-    // or sign up for QuickNode / Alchemy / Helius, etc.
+    // 2) Your personal Helius RPC endpoint:
+    //    (You posted it publicly in the conversation, so be aware anyone can see/use it)
+    const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
 
     async function checkToken() {
       const addressInput = document.getElementById('tokenAddress');
       const resultDiv = document.getElementById('result');
       const address = addressInput.value.trim();
-      resultDiv.textContent = ""; // Clear previous results
+
+      // Clear previous results
+      resultDiv.textContent = "";
 
       if (!address) {
-        alert('Please enter a token address!');
+        alert('Please enter a Solana address!');
         return;
       }
 
-      // Connect to the custom Solana RPC
+      // 3) Connect to Helius
       const connection = new solanaWeb3.Connection(RPC_ENDPOINT);
 
       try {
-        // Convert user input into a PublicKey
         const publicKey = new solanaWeb3.PublicKey(address);
 
-        // 1) Try getParsedAccountInfo first (works if it's an SPL token mint or token account)
+        // 4) Attempt getParsedAccountInfo (works for SPL token mints or token accounts)
         const parsedInfo = await connection.getParsedAccountInfo(publicKey);
-
+        
         if (parsedInfo.value) {
-          // If it returns something, let's see if it's "parsed" data
           const parsedData = parsedInfo.value.data;
+          // If recognized as an SPL token
           if (parsedData && parsedData.parsed) {
-            // We have a recognized SPL token format
             const owner = parsedData.parsed.info?.owner || 'N/A';
             const type  = parsedData.parsed.type || 'N/A';
             resultDiv.textContent = `SPL Token Account Info:\nOwner: ${owner}\nType: ${type}`;
@@ -65,15 +61,13 @@
           }
         }
 
-        // 2) If we reach here, either there's no parsed data or it's a system account
-        //    So let's just get raw account info
+        // 5) Fallback: get raw account info if not a parsed SPL token
         const rawInfo = await connection.getAccountInfo(publicKey);
         if (!rawInfo) {
           resultDiv.textContent = `No data found for ${address}.`;
           return;
         }
 
-        // Display basic raw info
         const ownerProgram = rawInfo.owner.toBase58();
         const dataSize = rawInfo.data.length;
         const isExecutable = rawInfo.executable;
@@ -82,7 +76,6 @@
           `Owner Program: ${ownerProgram}\n` +
           `Data Size: ${dataSize} bytes\n` +
           `Executable: ${isExecutable}`;
-        
       } catch (error) {
         console.error(error);
         resultDiv.textContent = 'Error fetching token info. Check console.\n' + error;
