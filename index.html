@@ -215,33 +215,31 @@
   // Your Helius RPC Endpoint
   const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
   
-  // We'll load the official Solana Token List on-demand:
+  // We load the official Solana Token List for logos/names + possible social links
   let tokenList = [];
-  let tokenListLoaded = false;
 
-  async function loadTokenListIfNeeded() {
-    // If it's already loaded, do nothing
-    if (tokenListLoaded) return;
+  async function loadTokenList() {
     try {
       const res = await fetch("https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json");
       const data = await res.json();
       tokenList = data.tokens || [];
-      tokenListLoaded = true;
       console.log("Token list loaded. Count:", tokenList.length);
     } catch (err) {
       console.error("Error loading token list:", err);
     }
   }
 
-  async function rugCheck() {
-    // Ensure token list is loaded before searching
-    await loadTokenListIfNeeded();
+  // On page load, fetch the token list
+  window.addEventListener("DOMContentLoaded", loadTokenList);
 
+  async function rugCheck() {
     const inputAddr = document.getElementById('tokenAddress').value.trim();
     if (!inputAddr) {
       alert("Please enter a token address!");
       return;
     }
+    // Convert to a PublicKey and then back to a full Base58 string
+    // This ensures we match the token list exactly
     let publicKey;
     try {
       publicKey = new solanaWeb3.PublicKey(inputAddr);
@@ -263,7 +261,6 @@
       if (tokenEntry) {
         document.getElementById("tokenName").textContent = tokenEntry.name || "Unknown";
         document.getElementById("tokenLogo").src = tokenEntry.logoURI || "https://via.placeholder.com/48/333/fff?text=No+Logo";
-        
         // Attempt to parse social links from "extensions"
         if (tokenEntry.extensions) {
           const ex = tokenEntry.extensions;
@@ -272,6 +269,7 @@
             links.push(`<a href="${ex.website}" target="_blank">Website</a>`);
           }
           if (ex.twitter) {
+            // If it's just a handle, link to twitter.com/handle
             const twitterHandle = ex.twitter.replace('@','');
             links.push(`<a href="https://twitter.com/${twitterHandle}" target="_blank">Twitter</a>`);
           }
@@ -281,6 +279,7 @@
           if (ex.telegram) {
             links.push(`<a href="${ex.telegram}" target="_blank">Telegram</a>`);
           }
+          // If we have any links, show them
           if (links.length > 0) {
             document.getElementById("socialLinks").innerHTML = links.join(" | ");
           } else {
@@ -307,4 +306,156 @@
         const type = parsedInfo.value.data.parsed.type;
         
         if (type === "mint") {
-          // It's 
+          // It's a token mint
+          isMint = true;
+          supply       = info.supply;
+          mintAuth     = info.mintAuthority   || "None";
+          freezeAuth   = info.freezeAuthority || "None";
+        } else if (type === "account") {
+          // It's a token holding account
+          isTokenAccount = true;
+          // If you want the mint supply, you'd fetch getTokenSupply(info.mint)
+          // For now, partial data only
+          mintAuth   = "(See Mint)";
+          freezeAuth = "(See Mint)";
+        }
+      } else {
+        // If not recognized as SPL token, fetch raw info
+        const rawInfo = await connection.getAccountInfo(publicKey);
+        if (!rawInfo) {
+          console.log("No data found for", fullAddress);
+        }
+      }
+
+      // If it's a mint, get more accurate supply
+      if (isMint) {
+        const tokenSupply = await connection.getTokenSupply(publicKey);
+        if (tokenSupply.value) {
+          supply = tokenSupply.value.amount;
+        }
+      }
+
+      // Update the left panel
+      document.getElementById("tokenAddr").textContent    = shortenAddress(fullAddress);
+      document.getElementById("tokenAddr").title          = fullAddress;
+      document.getElementById("tokenSupply").textContent  = formatNumber(supply);
+      document.getElementById("mintAuth").textContent     = (mintAuth === "None") 
+        ? "Secure" : "Insecure";
+      document.getElementById("mintAuth").className       = (mintAuth === "None") 
+        ? "secure-label" : "insecure-label";
+      document.getElementById("freezeAuth").textContent   = (freezeAuth === "None")
+        ? "Secure" : "Insecure";
+      document.getElementById("freezeAuth").className     = (freezeAuth === "None")
+        ? "secure-label" : "insecure-label";
+
+      // Compute Score + Risk Factors
+      const { score, statusLabel, lowCount, medCount, highCount } 
+        = computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuth, freezeAuth });
+
+      // Update right panel
+      document.getElementById("scoreCircle").textContent = score;
+      document.getElementById("scoreLabel").textContent  = `Safety Score: ${score} / 100`;
+      document.getElementById("safetyStatus").textContent= statusLabel;
+
+      // Risk factor circles
+      document.getElementById("riskLow").textContent  = lowCount;
+      document.getElementById("riskMed").textContent  = medCount;
+      document.getElementById("riskHigh").textContent = highCount;
+
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching token info. Check console.");
+    }
+  }
+
+  /* Placeholder logic for scoring + risk factor counts. 
+     You can refine or add real logic for your project. */
+  function computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuth, freezeAuth }) {
+    let score = 50;
+    let statusLabel = "Medium Risk";
+
+    let lowCount = 0, medCount = 0, highCount = 0;
+
+    if (isMint) {
+      if (mintAuth === "None") {
+        score += 30; // more trust
+        lowCount += 1;
+      } else {
+        score -= 20;
+        highCount += 1; // active mint authority is high risk
+      }
+      if (freezeAuth === "None") {
+        score += 10;
+        lowCount += 1;
+      } else {
+        score -= 10;
+        medCount += 1;
+      }
+    } else if (isTokenAccount) {
+      score -= 5;
+      medCount += 1;
+    } else {
+      // Not recognized as SPL token
+      score -= 10;
+      highCount += 1;
+    }
+
+    const numSupply = parseFloat(supply);
+    if (!isNaN(numSupply)) {
+      if (numSupply > 1000000000) {
+        score -= 10;
+        medCount += 1;
+      } else {
+        score += 5;
+        lowCount += 1;
+      }
+    }
+
+    // Bound the score
+    if (score < 0)   score = 0;
+    if (score > 100) score = 100;
+
+    if (score >= 80) {
+      statusLabel = "Safe";
+    } else if (score < 50) {
+      statusLabel = "High Risk";
+    }
+
+    return { score, statusLabel, lowCount, medCount, highCount };
+  }
+
+  function resetUI(fullAddress) {
+    document.getElementById("tokenName").textContent = "Unknown";
+    document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+    document.getElementById("tokenAddr").textContent = shortenAddress(fullAddress);
+    document.getElementById("tokenAddr").title       = fullAddress;
+    document.getElementById("tokenSupply").textContent = "--";
+    document.getElementById("mintAuth").textContent    = "--";
+    document.getElementById("freezeAuth").textContent  = "--";
+    document.getElementById("mintAuth").className = "";
+    document.getElementById("freezeAuth").className = "";
+    document.getElementById("socialLinks").textContent = "No info found";
+    document.getElementById("scoreCircle").textContent = "--";
+    document.getElementById("scoreLabel").textContent  = "Safety Score: -- / 100";
+    document.getElementById("safetyStatus").textContent= "Unknown";
+    document.getElementById("riskLow").textContent  = "0";
+    document.getElementById("riskMed").textContent  = "0";
+    document.getElementById("riskHigh").textContent = "0";
+  }
+
+  // Shorten address to e.g. "mo7m...Wi5N"
+  function shortenAddress(addr) {
+    if (addr.length <= 8) return addr;
+    return addr.slice(0,4) + "..." + addr.slice(-4);
+  }
+
+  // Format supply with commas
+  function formatNumber(numStr) {
+    if (numStr === "--") return "--";
+    const n = parseFloat(numStr);
+    if (isNaN(n)) return numStr;
+    return n.toLocaleString();
+  }
+</script>
+</body>
+</html>
