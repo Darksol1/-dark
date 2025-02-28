@@ -20,12 +20,12 @@
 
   <div id="result" style="margin-top:20px; white-space:pre; font-family:monospace;"></div>
 
-  <!-- 1) Load the Solana Web3.js library from a CDN -->
+  <!-- Load the Solana Web3.js library from unpkg or jsDelivr -->
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-  
+
   <script>
-    // 2) Your personal Helius RPC endpoint:
-    //    (You posted it publicly in the conversation, so be aware anyone can see/use it)
+    // Replace with your personal Helius RPC endpoint:
+    // e.g. "https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY"
     const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
 
     async function checkToken() {
@@ -41,27 +41,59 @@
         return;
       }
 
-      // 3) Connect to Helius
+      // Connect to Helius
       const connection = new solanaWeb3.Connection(RPC_ENDPOINT);
 
       try {
         const publicKey = new solanaWeb3.PublicKey(address);
 
-        // 4) Attempt getParsedAccountInfo (works for SPL token mints or token accounts)
+        // Attempt getParsedAccountInfo first (works for SPL token mints & token accounts)
         const parsedInfo = await connection.getParsedAccountInfo(publicKey);
-        
+
         if (parsedInfo.value) {
           const parsedData = parsedInfo.value.data;
-          // If recognized as an SPL token
           if (parsedData && parsedData.parsed) {
-            const owner = parsedData.parsed.info?.owner || 'N/A';
-            const type  = parsedData.parsed.type || 'N/A';
-            resultDiv.textContent = `SPL Token Account Info:\nOwner: ${owner}\nType: ${type}`;
-            return;
+            // "type" can be "mint" (for a token mint) or "account" (for a token holding account)
+            const accountType = parsedData.parsed.type || 'N/A';
+            const info = parsedData.parsed.info || {};
+
+            if (accountType === 'mint') {
+              // Show mint details
+              const mintAuthority   = info.mintAuthority   || 'None';
+              const freezeAuthority = info.freezeAuthority || 'None';
+              const decimals        = info.decimals;
+              const supply          = info.supply;
+              resultDiv.textContent =
+                `SPL Token Mint Info:\n` +
+                `Mint Authority:   ${mintAuthority}\n` +
+                `Freeze Authority: ${freezeAuthority}\n` +
+                `Decimals:         ${decimals}\n` +
+                `Supply:           ${supply}`;
+              return;
+            } else if (accountType === 'account') {
+              // This is a token holding account
+              // Typically "info.owner" is the wallet that owns this token account
+              const owner      = info.owner || 'N/A';
+              const tokenAmount = info.tokenAmount;
+              const amount     = tokenAmount?.amount;
+              const decimals   = tokenAmount?.decimals;
+              resultDiv.textContent =
+                `SPL Token Account Info:\n` +
+                `Owner (wallet): ${owner}\n` +
+                `Balance:        ${amount}\n` +
+                `Decimals:       ${decimals}`;
+              return;
+            } else {
+              // Some other SPL token type
+              resultDiv.textContent =
+                `SPL Token Account Info:\nType: ${accountType}\n(No additional data)`;
+              return;
+            }
           }
         }
 
-        // 5) Fallback: get raw account info if not a parsed SPL token
+        // If we reach here, it's not a parsed SPL token or there's no data
+        // So let's fetch raw info
         const rawInfo = await connection.getAccountInfo(publicKey);
         if (!rawInfo) {
           resultDiv.textContent = `No data found for ${address}.`;
@@ -74,8 +106,8 @@
         resultDiv.textContent =
           `Raw Account Info:\n` +
           `Owner Program: ${ownerProgram}\n` +
-          `Data Size: ${dataSize} bytes\n` +
-          `Executable: ${isExecutable}`;
+          `Data Size:     ${dataSize} bytes\n` +
+          `Executable:    ${isExecutable}`;
       } catch (error) {
         console.error(error);
         resultDiv.textContent = 'Error fetching token info. Check console.\n' + error;
