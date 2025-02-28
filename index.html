@@ -399,6 +399,7 @@
       document.getElementById("freezeAuth").textContent = (freezeAuth === "None") ? "Secure" : "Insecure";
       document.getElementById("freezeAuth").className = (freezeAuth === "None") ? "secure-label" : "insecure-label";
 
+      // Compute placeholder score and risk (will be updated by RugCheck API if available)
       const { score, statusLabel, lowCount, medCount, highCount } = computeScoreAndRisk({
         isMint, isTokenAccount, supply, mintAuth, freezeAuth
       });
@@ -409,13 +410,12 @@
       document.getElementById("riskMed").textContent = medCount;
       document.getElementById("riskHigh").textContent = highCount;
 
-      // If it's a mint, fetch market data from Dexscreener and top holders
+      // If it's a mint, fetch market data, top holders, and RugCheck report
       if (isMint && decimals) {
         const dexscreenerData = await fetchDexscreenerData(fullAddress);
         if (dexscreenerData && dexscreenerData.pairs && dexscreenerData.pairs.length > 0) {
           // Map Dexscreener pairs to our table format
           const markets = dexscreenerData.pairs.map(pair => {
-            // Use baseToken and targetToken symbols to build pair info
             const pairStr = pair.baseToken && pair.targetToken
               ? `${pair.baseToken.symbol}/${pair.targetToken.symbol}`
               : "N/A";
@@ -432,9 +432,11 @@
         } else {
           populateMarketsTable([]);
         }
-        // Fetch top holders data on-chain
         const topHolders = await fetchTopHolders(connection, fullAddress);
         populateHoldersTable(topHolders);
+
+        // Call RugCheck API to fetch detailed report and update the analysis UI
+        await fetchRugCheckReport(fullAddress);
       } else {
         document.getElementById("marketsBody").innerHTML = "";
         document.getElementById("holdersBody").innerHTML = "";
@@ -442,6 +444,33 @@
     } catch (err) {
       console.error(err);
       alert("Error fetching token info. Check console.");
+    }
+  }
+
+  // Fetch RugCheck report from the API and update the UI
+  async function fetchRugCheckReport(mintAddress) {
+    const url = `https://api.rugcheck.xyz/v1/tokens/${mintAddress}/report/summary`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.error("RugCheck API returned an error");
+        return;
+      }
+      const data = await response.json();
+      // Update UI with RugCheck API data
+      document.getElementById("scoreCircle").textContent = data.score;
+      document.getElementById("scoreLabel").textContent = `Safety Score: ${data.score} / 100`;
+      document.getElementById("safetyStatus").textContent = data.rugged ? "High Risk" : "Safe";
+      if (data.risks && Array.isArray(data.risks)) {
+        const lowCount = data.risks.filter(risk => risk.level === "low").length;
+        const medCount = data.risks.filter(risk => risk.level === "medium").length;
+        const highCount = data.risks.filter(risk => risk.level === "high").length;
+        document.getElementById("riskLow").textContent = lowCount;
+        document.getElementById("riskMed").textContent = medCount;
+        document.getElementById("riskHigh").textContent = highCount;
+      }
+    } catch (err) {
+      console.error("Error fetching RugCheck report:", err);
     }
   }
 
