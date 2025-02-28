@@ -29,42 +29,36 @@
       const address = document.getElementById('tokenAddress').value.trim();
       const resultDiv = document.getElementById('result');
 
-      // If no address is entered, stop here
       if (!address) {
         alert('Please enter a token address!');
         return;
       }
 
-      // Use a custom Solana RPC endpoint to avoid 403 from the default
-      // GenesysGo endpoint:
-      const RPC_ENDPOINT = "https://ssc-dao.genesysgo.net/";
-      // You can also use a free endpoint from a provider like QuickNode or Alchemy
-      // Example:
-      // const RPC_ENDPOINT = "https://quiet-long-frost.solana-mainnet.discover.quiknode.pro/YOUR-API-KEY/";
+      // Try a different public RPC to avoid 403 blocks
+      const RPC_ENDPOINT = "https://rpc.ankr.com/solana";
+      // Other public endpoints you can try:
+      //   "https://solana-api.projectserum.com"
+      //   "https://api.metaplex.solana.com"
+      //   "https://api.mainnet.rpcpool.com"
+
+      // Or sign up for QuickNode / Alchemy for your own dedicated URL:
+      //   const RPC_ENDPOINT = "https://<YOUR-QUICKNODE-OR-ALCHEMY-URL>/";
 
       const connection = new solanaWeb3.Connection(RPC_ENDPOINT);
 
       try {
-        // Convert user input into a PublicKey
         const publicKey = new solanaWeb3.PublicKey(address);
-
-        // Fetch basic info about this account
         const accountInfo = await connection.getParsedAccountInfo(publicKey);
 
-        // If no data is found, inform the user
         if (!accountInfo.value) {
           resultDiv.innerText = `No data found for ${address}.`;
           return;
         }
 
-        // Display some basic info about the account
         const data  = accountInfo.value.data;
         const owner = data?.parsed?.info?.owner || 'N/A';
         const type  = data?.parsed?.type  || 'N/A';
         resultDiv.innerText = `Owner: ${owner}\nType: ${type}`;
-
-        // Note: For a full "rug check," you’d fetch more data, e.g. mint authority,
-        // freeze authority, top holders, etc. This is just a starting point.
 
       } catch (error) {
         console.error(error);
