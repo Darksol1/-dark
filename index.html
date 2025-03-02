@@ -341,7 +341,7 @@
         if (tokenEntry.logoURI) {
           document.getElementById("tokenLogo").src = tokenEntry.logoURI;
         } else {
-          document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+          document.getElementById("tokenLogo").src = "https://via.placeholder.com/48";
         }
         if (tokenEntry.extensions) {
           const ex = tokenEntry.extensions;
@@ -358,7 +358,7 @@
       } else {
         console.log("Token entry not found for address:", fullAddress); // Debugging: Log if token entry is missing
         document.getElementById("tokenName").textContent = "Unknown";
-        document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+        document.getElementById("tokenLogo").src = "https://via.placeholder.com/48";
       }
 
       // Fetch on-chain token info
@@ -458,6 +458,10 @@
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Dexscreener API error: ${response.status} ${response.statusText}`);
+      }
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Dexscreener API did not return JSON");
       }
       const data = await response.json();
       return data;
@@ -577,7 +581,7 @@
 
   function resetUI(fullAddress) {
     document.getElementById("tokenName").textContent = "Unknown";
-    document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+    document.getElementById("tokenLogo").src = "https://via.placeholder.com/48";
     document.getElementById("tokenAddr").textContent = shortenAddress(fullAddress);
     document.getElementById("tokenAddr").title = fullAddress;
     document.getElementById("tokenSupply").textContent = "--";
