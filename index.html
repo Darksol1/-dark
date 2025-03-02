@@ -456,6 +456,9 @@
     const url = `https://api.dexscreener.com/latest/dex/tokens/solana/${mintAddress}`;
     try {
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Dexscreener API error: ${response.status} ${response.statusText}`);
+      }
       const data = await response.json();
       return data;
     } catch (err) {
