@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Solana Rug Checker (Better UI Demo)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Solana Rug Checker (Name Demo)</title>
   <style>
     body {
-      background-color: #121212;
+      background: #121212;
       color: #fff;
       font-family: Arial, sans-serif;
       margin: 0;
@@ -54,7 +54,7 @@
       margin-top: 0;
       margin-bottom: 1rem;
     }
-    .analysis-section .card {
+    .card {
       background: #2b2b2b;
       padding: 1rem;
       border-radius: 8px;
@@ -64,7 +64,7 @@
     .card h3 {
       margin: 0 0 0.5rem 0;
     }
-    .card .risk-label {
+    .risk-label {
       display: inline-block;
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
@@ -80,6 +80,9 @@
       background-color: #c0392b;
     }
   </style>
+
+  <!-- Include the Solana web3.js library (for PublicKey, findProgramAddress, etc.) -->
+  <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.76.0/dist/web3.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -88,6 +91,7 @@
       <input id="tokenAddress" placeholder="token address here" />
       <button id="checkBtn">Rug Check</button>
     </div>
+
     <div id="analysis" class="analysis-section" style="display: none;">
       <h2>Token Safety Analysis</h2>
       <div id="analysis-content"></div>
@@ -95,8 +99,84 @@
   </div>
 
   <script>
-    // WARNING: Exposes your API key publicly! Only use this for demos/testing.
-    const HELIUS_URL = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
+    // WARNING: Exposes your API key publicly! For DEMO only, not production.
+    const HELIUS_URL =
+      "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
+
+    // The Metaplex metadata program ID
+    const METADATA_PROGRAM_ID = new solanaWeb3.PublicKey(
+      "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+    );
+
+    // Derive the PDA for the Metaplex metadata account for a given mint
+    async function getMetadataPDA(mintPubkey) {
+      // findProgramAddress is asynchronous
+      const [pda] = await solanaWeb3.PublicKey.findProgramAddress(
+        [
+          Buffer.from("metadata"),
+          METADATA_PROGRAM_ID.toBuffer(),
+          mintPubkey.toBuffer()
+        ],
+        METADATA_PROGRAM_ID
+      );
+      return pda;
+    }
+
+    // Attempt to fetch the on-chain metadata account and parse out the "name"
+    async function fetchTokenName(tokenAddress) {
+      try {
+        const mintPubkey = new solanaWeb3.PublicKey(tokenAddress);
+        const metadataPDA = await getMetadataPDA(mintPubkey);
+
+        // Now we do a getAccountInfo on the metadata PDA
+        const payload = {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "getAccountInfo",
+          params: [
+            metadataPDA.toBase58(),
+            { encoding: "base64" }
+          ]
+        };
+
+        const resp = await fetch(HELIUS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const json = await resp.json();
+        const base64Data = json?.result?.value?.data?.[0];
+        if (!base64Data) {
+          // No metadata found
+          return null;
+        }
+
+        // Decode base64
+        const buffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+
+        // The Metaplex metadata layout is quite complex. We'll do a partial parse:
+        // Typically, name is at offset ~ 1 + 32 + 32 + 4... But it can vary.
+        // A robust parse would use a library. We'll do a quick approach.
+
+        // There's a 1-byte key, then 32 for updateAuth, 32 for mint,
+        // then a variable length "name" (string) preceded by a u16 length.
+
+        // We'll skip 1 + 32 + 32 = 65 bytes. Then read 4 bytes for name length, then read the name.
+        let offset = 65;
+        const nameLength = (buffer[offset]) +
+                           (buffer[offset+1] << 8) +
+                           (buffer[offset+2] << 16) +
+                           (buffer[offset+3] << 24);
+        offset += 4;
+        const nameBytes = buffer.slice(offset, offset + nameLength);
+        const name = new TextDecoder().decode(nameBytes).replace(/\0/g, "");
+
+        return name || null;
+      } catch (e) {
+        console.warn("Error fetching token name:", e);
+        return null;
+      }
+    }
 
     document.getElementById("checkBtn").addEventListener("click", async () => {
       const tokenAddress = document.getElementById("tokenAddress").value.trim();
@@ -106,28 +186,26 @@
       }
 
       // We'll do two calls:
-      // 1) getTokenSupply       -> to get total supply
-      // 2) getAccountInfo       -> to check freezeAuthority, mintAuthority
-      // Then we do a basic "risk" check for demonstration.
-
+      // 1) getTokenSupply -> to get total supply
+      // 2) getAccountInfo -> for freezeAuthority, mintAuthority
+      // Then we fetch the Metaplex metadata name (if it exists).
       const supplyPayload = {
         jsonrpc: "2.0",
         id: 1,
         method: "getTokenSupply",
-        params: [tokenAddress]
+        params: [tokenAddress],
       };
-
       const accountInfoPayload = {
         jsonrpc: "2.0",
         id: 1,
         method: "getAccountInfo",
         params: [
           tokenAddress,
-          { encoding: "jsonParsed" }
-        ]
+          { encoding: "jsonParsed" },
+        ],
       };
 
-      let supplyData, accountInfoData;
+      let supplyData, accountInfoData, tokenName;
       try {
         // 1) Fetch token supply
         const supplyRes = await fetch(HELIUS_URL, {
@@ -146,35 +224,39 @@
         });
         const accountJson = await accountRes.json();
         accountInfoData = accountJson?.result?.value?.data?.parsed?.info;
+
+        // 3) Try to fetch the token name from Metaplex metadata
+        tokenName = await fetchTokenName(tokenAddress);
       } catch (error) {
         alert("Error fetching data from Helius: " + error.message);
         return;
       }
 
       // Extract data
-      // e.g. supplyData might have: { amount: "9900000000", decimals: 9, uiAmount: 9.9, uiAmountString: "9.9" }
       const totalSupply = supplyData?.uiAmountString || "N/A";
       const freezeAuthority = accountInfoData?.freezeAuthority || null;
       const mintAuthority = accountInfoData?.mintAuthority || null;
 
-      // Basic "risk" logic: if freeze or mint authority exist, label "Medium Risk"
+      // Basic "risk" logic
       let riskLabel = "Low Risk";
       let riskClass = "risk-low";
       if (freezeAuthority || mintAuthority) {
         riskLabel = "Medium Risk";
         riskClass = "risk-medium";
       }
-      // You can add more checks for a "High Risk" label if needed.
 
       // Show the analysis section
       document.getElementById("analysis").style.display = "block";
-
-      // Render the data in a nice UI
       const contentDiv = document.getElementById("analysis-content");
+
       contentDiv.innerHTML = `
         <div class="card">
           <h3>Token Address</h3>
           <p>${tokenAddress}</p>
+        </div>
+        <div class="card">
+          <h3>Token Name</h3>
+          <p>${tokenName ? tokenName : "Not found or not Metaplex standard"}</p>
         </div>
         <div class="card">
           <h3>Supply</h3>
