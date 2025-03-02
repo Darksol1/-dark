@@ -288,7 +288,7 @@
   // Your Helius RPC Endpoint
   const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
   // USDC Mint on Solana for reference (to get price in USDC)
-  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt";
+  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
   // Token Program ID
   const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 
@@ -336,8 +336,13 @@
       // Look up token info from the token list
       const tokenEntry = tokenList.find(t => t.address === fullAddress);
       if (tokenEntry) {
+        console.log("Token entry found:", tokenEntry); // Debugging: Log the token entry
         document.getElementById("tokenName").textContent = tokenEntry.name || "Unknown";
-        document.getElementById("tokenLogo").src = tokenEntry.logoURI || "https://via.placeholder.com/48/333/fff?text=No+Logo";
+        if (tokenEntry.logoURI) {
+          document.getElementById("tokenLogo").src = tokenEntry.logoURI;
+        } else {
+          document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+        }
         if (tokenEntry.extensions) {
           const ex = tokenEntry.extensions;
           let links = [];
@@ -351,6 +356,7 @@
           document.getElementById("socialLinks").innerHTML = links.length ? links.join(" | ") : "No info found";
         }
       } else {
+        console.log("Token entry not found for address:", fullAddress); // Debugging: Log if token entry is missing
         document.getElementById("tokenName").textContent = "Unknown";
         document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
       }
