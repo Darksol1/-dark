@@ -209,7 +209,7 @@
   <!-- Left Panel: Token Info -->
   <div class="left-panel">
     <div class="token-header">
-      <img id="tokenLogo" class="token-logo" src="" alt="Token Logo">
+      <img id="tokenLogo" class="token-logo" src="https://via.placeholder.com/48/333/fff?text=No+Logo" alt="Token Logo">
       <h2 id="tokenName" class="token-title">Unknown</h2>
     </div>
     <div class="token-info">
@@ -337,7 +337,7 @@
       const tokenEntry = tokenList.find(t => t.address === fullAddress);
       if (tokenEntry) {
         document.getElementById("tokenName").textContent = tokenEntry.name || "Unknown";
-        document.getElementById("tokenLogo").src = tokenEntry.logoURI || "https://via.placeholder.com/48/333/fff?text=No+Logo";
+        await setTokenLogo(tokenEntry); // Use the improved logo function
         if (tokenEntry.extensions) {
           const ex = tokenEntry.extensions;
           let links = [];
@@ -352,7 +352,7 @@
         }
       } else {
         document.getElementById("tokenName").textContent = "Unknown";
-        document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+        await setTokenLogo(null); // Fallback for unknown tokens
       }
 
       // Fetch on-chain token info
@@ -627,6 +627,26 @@
     if (isNaN(n)) return numStr;
     return n.toLocaleString();
   }
+
+  // Improved logo handling function
+  async function setTokenLogo(tokenEntry) {
+    if (tokenEntry && tokenEntry.logoURI) {
+        try {
+            // Test the logo URL with a simple fetch
+            const response = await fetch(tokenEntry.logoURI, { method: 'HEAD' });
+            if (response.ok) {
+                document.getElementById("tokenLogo").src = tokenEntry.logoURI;
+            } else {
+                document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+            }
+        } catch (error) {
+            console.error("Error loading logo:", error);
+            document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+        }
+    } else {
+        document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+    }
+}
 </script>
 </body>
 </html>
