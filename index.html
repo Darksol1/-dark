@@ -1,824 +1,603 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>SHERDOG - Anti Scam Tools</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="author" content="SHERDOG" />
-
-    <!-- Styles and Fonts -->
-    <link rel="stylesheet" href="css/normalize.css" />
-    <link rel="stylesheet" href="css/styles.css" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Jersey+20&family=Open+Sans+Condensed:wght@300;700&display=swap"
-    />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Jersey+20&family=Open+Sans+Condensed:wght@300;700&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
-
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Jersey+20&family=Open+Sans+Condensed:wght@300;700&display=swap"
-      />
-    </noscript>
-
-    <!-- Favicon / Icons (replace or remove as needed) -->
-    <link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png" />
-    <link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png" />
-    <link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png" />
-    <link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png" />
-    <link
-      rel="apple-touch-icon"
-      sizes="114x114"
-      href="apple-icon-114x114.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="120x120"
-      href="apple-icon-120x120.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="144x144"
-      href="apple-icon-144x144.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="152x152"
-      href="apple-icon-152x152.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="apple-icon-180x180.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="192x192"
-      href="android-icon-192x192.png"
-    />
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
-    <link rel="manifest" href="manifest.json" />
-    <meta name="msapplication-TileColor" content="#ffffff" />
-    <meta name="msapplication-TileImage" content="ms-icon-144x144.png" />
-    <meta name="theme-color" content="#ffffff" />
-
-    <!-- Analytics or other scripts -->
-    <script>
-      window.va =
-        window.va ||
-        function () {
-          (window.vaq = window.vaq || []).push(arguments);
-        };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
-
-    <!-- Navbar scroll script -->
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const nav = document.querySelector(".navbar-fixed-top");
-
-        document.addEventListener("scroll", function () {
-          nav.classList.toggle("scrolled", window.scrollY > nav.offsetHeight);
-        });
-      });
-    </script>
-  </head>
-
-  <body>
-    <div class="head-bar navbar-fixed-top">
-      <div class="better-experience-container">
-        SHERDOG Whitepaper Live:
-        <a
-          href="https://www.sherdog.meme/sherdog-whitepaper.pdf"
-          target="_blank"
-          style="color: white;"
-          >READ HERE</a
-        >
-      </div>
-      <div class="head-bar-wrapper">
-        <div class="logo-wrapper">
-          <!-- Replace with your dog's symbol -->
-          <img src="img/dog-symbol.png" alt="dog detective symbol" />
-          <h1>SHERDOG</h1>
-        </div>
-        <nav>
-          <a
-            href="https://jup.ag/swap/SOL-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="link-btn"
-          >
-            <button class="catbat-buy-btn menu-btn">BUY $SHERDOG</button>
-          </a>
-        </nav>
-      </div>
-    </div>
-
-    <div class="container">
-      <!-- VIDEO HEADER (replace with your own detective/dark city video if you have one) -->
-      <div class="video-container">
-        <div class="tagline">
-          <h2>SLEUTH HOUND<br />OF CRYPTO</h2>
-        </div>
-        <video autoplay muted loop playsinline class="background-video">
-          <source src="video/dogdetective-bg.mp4" type="video/mp4" />
-          <source src="video/dogdetective-bg.webm" type="video/webm" />
-        </video>
-        <div class="social-icons">
-          <!-- Example social icons: DEX, Telegram, Twitter, etc. -->
-          <a href="#" target="_blank">
-            <!-- Dex icon -->
-            <svg><!-- ... --></svg>
-          </a>
-          <a href="https://t.me/sherdogportal" target="_blank" class="tg-social-icon">
-            <svg><!-- ... --></svg>
-          </a>
-          <a href="https://x.com/sherdogcoin" target="_blank">
-            <svg><!-- ... --></svg>
-          </a>
-          <a href="https://www.dextools.io/app/..." target="_blank">
-            <svg><!-- ... --></svg>
-          </a>
-        </div>
-        <div class="gradient-overlay"></div>
-      </div>
-
-      <!-- CLAIM SECTION -->
-      <div class="day-container">
-        <div class="day-wrapper">
-          <h2>CLOSE RUGGED ACCOUNTS <br />AND CLAIM $SHERDOG</h2>
-          <a
-            href="https://www.claimmysherdog.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="link-btn"
-          >
-            <button class="catbat-buy-btn">Claim $SHERDOG</button>
-          </a>
-        </div>
-      </div>
-
-      <!-- WHO IS SHERDOG? -->
-      <div class="who-container">
-        <div class="who-wrapper">
-          <div class="who-block">
-            <h2 class="h2-margin-b">Who is <span>SHERDOG</span>?</h2>
-            <p class="p-margin-b">
-              SHERDOG is a unique memecoin that blends fun with functionality.
-            </p>
-            <p class="p-margin-b">
-              Inspired by the need for more security in the crypto space,
-              SHERDOG is on a mission to fight scams and rug pulls.
-            </p>
-            <div class="contract-field">
-              <p class="contract-text">contract</p>
-              <div class="ca-wrapper">
-                <textarea class="full-ca" readonly>
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                </textarea>
-                <span class="ca-text">xxxxxx...xxxx</span>
-                <span class="copy-icon">
-                  <!-- Copy icon SVG -->
-                  <svg><!-- ... --></svg>
-                </span>
-              </div>
-            </div>
-            <a
-              href="https://jup.ag/swap/SOL-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link-btn"
-            >
-              <button class="catbat-buy-btn">BUY $SHERDOG</button>
-            </a>
-          </div>
-          <div class="catbat-news-wrapper">
-            <!-- Replace with your Sherlock dog reading news or an equivalent image -->
-            <img
-              src="img/dogdetective-news.png"
-              alt="dog detective reading the news"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- WHY SHERDOG? -->
-      <div class="why-container">
-        <div class="why-wrapper">
-          <div class="why-block">
-            <h2 class="h2-margin-b">Why <span>SHERDOG</span>?</h2>
-            <p class="p-margin-b">
-              You shouldn't have to struggle to verify projects by jumping
-              between multiple tools, each giving you only a small piece of the
-              puzzle.
-            </p>
-            <p class="p-margin-b">
-              We're building an all-in-one platform to detect scams and rug
-              pulls, combining essential checks into one easy-to-use solution.
-            </p>
-          </div>
-          <div class="catbat-jump-block">
-            <!-- Replace with a dog detective action image -->
-            <img
-              src="img/dogdetective-jump.png"
-              class="catbat-jump-img"
-              alt="dog detective jumping"
-            />
-          </div>
-        </div>
-        <div class="catbat-car-container">
-          <!-- Another example image you can replace -->
-          <img src="img/dog-car-chase.jpg" alt="dog detective in a car chase" />
-        </div>
-      </div>
-
-      <!-- WHAT WE ARE BUILDING -->
-      <div class="what-container">
-        <div class="what-wrapper">
-          <h2 class="h2-margin-b">What We Are Building</h2>
-          <div class="what-block">
-            <div class="catbat-message-block">
-              I'm going to sniff out all rug pulls in the City of Rugs! 🐾
-            </div>
-          </div>
-          <div class="what-info-block">
-            <div class="what-text-block">
-              <p class="p-heading">All-in-One Rug Check Tool</p>
-              <p>
-                A single web platform to detect scams and rug pulls with
-                essential checks.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Scammer Ranking System</p>
-              <p>
-                Community-driven leaderboard of reported scammer Twitter
-                accounts.
-              </p>
-            </div>
-          </div>
-          <div class="what-much-more-block">
-            <h4>...and much more.</h4>
-            <span>Read the full details <br />on our roadmap.</span>
-          </div>
-        </div>
-        <div class="catbat-hand-up-container">
-          <!-- Another image placeholder -->
-          <img src="img/dogdetective-hand-up.png" class="catbat-hand-up-img" />
-        </div>
-      </div>
-
-      <!-- WHERE IS SHERDOG? -->
-      <div class="where-container">
-        <div class="who-wrapper">
-          <div class="who-block">
-            <h2 class="h2-margin-b">Where is <span>SHERDOG</span>?</h2>
-            <p class="p-margin-b">
-              In the City of Rugs, protecting your bags, SHERDOG hunts down
-              scammers lurking in the shadows.
-            </p>
-            <p class="p-margin-b">
-              With sharp instincts and a no-nonsense attitude, he exposes fraud
-              and fights to keep your bags safe.
-            </p>
-            <div class="contract-field">
-              <p class="contract-text">contract</p>
-              <div class="ca-wrapper">
-                <textarea class="full-ca" readonly>
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                </textarea>
-                <span class="ca-text">xxxxxx...xxxx</span>
-                <span class="copy-icon">
-                  <!-- Copy icon SVG -->
-                  <svg><!-- ... --></svg>
-                </span>
-              </div>
-            </div>
-            <a
-              href="https://jup.ag/swap/SOL-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link-btn"
-            >
-              <button class="catbat-buy-btn">BUY $SHERDOG</button>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- MOONSHOT SECTION (Replace references with your own) -->
-      <div class="moonshot-container">
-        <img src="img/dogdetective-moonshot-launch.jpg" class="catbat-moonshot-img" />
-        <div class="moonshot-wrapper">
-          <h2 class="h2-margin-b">
-            Launch on Moonshot
-            <span>
-              <!-- Some icon or small graphic -->
-              <svg><!-- ... --></svg>
-            </span>
-          </h2>
-          <div class="what-info-block moonshot-info-block">
-            <div class="what-text-block">
-              <p class="p-heading">No Pre-Sale, No Insiders:</p>
-              <p>
-                Everyone gets a fair shot at buying SHERDOG from the start — no
-                special deals, no early advantages.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Fully Audited &amp; Secure:</p>
-              <p>
-                SHERDOG is built on Moonshot's fully audited smart contracts,
-                ensuring transparency and safety.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Ownership Renounced:</p>
-              <p>
-                SHERDOG tokens are immutable, meaning no one can change the rules
-                or manipulate the contract.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Buy &amp; Sell Anytime:</p>
-              <p>Freedom to trade SHERDOG without restrictions.</p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Supply:</p>
-              <p>Maximum supply capped at 1 billion ($SHERDOG) tokens.</p>
-            </div>
-            <a
-              href="https://jup.ag/swap/SOL-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link-btn"
-            >
-              <button class="catbat-buy-btn">BUY $SHERDOG</button>
-            </a>
-          </div>
-          <div class="catbat-secure-block">
-            <img
-              src="img/dogdetective-secure.jpg"
-              class="catbat-secure-img"
-              alt="dog detective secure"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- METEORA DEX SECTION -->
-      <div class="meteora-container">
-        <div class="meteora-wrapper">
-          <div class="heading-wrapper">
-            <h2>Meteora DEX</h2>
-            <span>
-              <svg><!-- ... --></svg>
-            </span>
-          </div>
-          <p class="meteora-subheading">
-            Following a successful Moonshot launch and migration to Meteora, Top
-            50 SHERDOG holders receive daily rewards, with liquidity locked
-            forever and regular token burns
-          </p>
-          <div class="catbat-meteora-block">
-            <img src="img/dogdetective-meteora-dex.jpg" alt="dog detective at meteora dex" />
-          </div>
-          <div class="what-info-block moonshot-info-block">
-            <div class="what-text-block">
-              <p class="p-heading">Earn Lifetime Rewards:</p>
-              <p>
-                Once $SHERDOG migrates to Meteora, holders in the Top 50 earn
-                daily LP rewards airdropped directly to their wallets.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Auto-Claimed Rewards:</p>
-              <p>
-                No action needed—SOL rewards are auto-claimed every 24 hours. The
-                token portion of rewards is burned, increasing SHERDOG scarcity.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Stay in the Top 50:</p>
-              <p>
-                Simply hold enough SHERDOG to remain in the Top 50 holders to
-                keep earning rewards.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Open to New Top Holders:</p>
-              <p>
-                Anyone can take over a Top 50 spot at any time and start earning
-                rewards.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Rug-Proof Rewards:</p>
-              <p>
-                Only holders (including devs) who remain in the Top 50 receive
-                rewards—no tolerance for quick profit-takers.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Anti-Gaming Airdrop Schedules:</p>
-              <p>
-                Airdrops occur randomly every 24 hours, preventing attempts to
-                game the system.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">On-Chain Tracking:</p>
-              <p>
-                Track all rewards distributions and token burns on-chain via
-                Meteora for complete transparency.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading">Exclusive Meteora Rewards:</p>
-              <p>
-                Only tokens bonded to Meteora receive these unique rewards, with
-                fees designed to reward long-term holders.
-              </p>
-            </div>
-          </div>
-          <div class="catbat-attack-container">
-            <img src="img/dogdetective-attack.jpg" alt="dog detective in action" />
-          </div>
-        </div>
-      </div>
-
-      <!-- ROADMAP -->
-      <div class="roadmap-container">
-        <h2>Roadmap</h2>
-        <p class="meteora-subheading">
-          As each milestone is delivered, the roadmap on our website will be
-          updated with a checkmark.
-        </p>
-      </div>
-
-      <!-- PHASE 1 -->
-      <div id="roadmap"></div>
-      <img src="img/dogdetective-phase-one.jpg" alt="Phase One" />
-      <div class="roadmap-container">
-        <div class="roadmap-wrapper">
-          <h3>Phase 1: Foundation &amp; Community Building (Q4 2024)</h3>
-          <div class="what-info-block moonshot-info-block roadmap-info-block">
-            <div class="what-text-block">
-              <p class="p-heading ready">Website &amp; Moonshot Launch:</p>
-              <p>
-                Officially launch $SHERDOG on Moonshot with a dedicated website
-                featuring the SHERDOG story, token details, and initial roadmap.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">100k Replies:</p>
-              <p>
-                Reach 100,000 replies from the main SHERDOG account in Q4 to
-                boost visibility and community engagement.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Community Growth:</p>
-              <p>
-                Build an active community on Telegram (1k members) and Twitter
-                (1k followers) through regular engagement, giveaways, and
-                updates.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading ready">Blue Checkmark on Twitter:</p>
-              <p>
-                Secure the blue verification checkmark to establish credibility
-                and authenticity on Twitter, strengthening SHERDOG's brand
-                presence.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Educational Content:</p>
-              <p>
-                Publish at least 5 articles focused on identifying scams,
-                analyzing tokens, and using tools to verify project legitimacy.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">SHERDOG Rug Check Tool Design:</p>
-              <p>
-                Wireframes &amp; UI Mockups: Deliver 3 wireframe versions and 3
-                UI mockups showing the core layout, functionality, and user
-                experience of the rug check tool.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Weekly Progress Updates:</p>
-              <p>
-                Share a total of 9 weekly updates (one per week) across Twitter,
-                Telegram, and the website, covering key achievements,
-                development progress, community growth, and upcoming milestones.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Twitter Spaces &amp; KOL Collaboration:</p>
-              <p>
-                Host 3 Twitter Spaces focused on crypto safety, SHERDOG's
-                mission, and discussions with Key Opinion Leaders (KOLs).
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Scam Reporting Form:</p>
-              <p>
-                Launch a feature on the website where users can submit
-                information about scam groups from Reddit, X (Twitter), and
-                Telegram, creating a public list with evidence.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Gather Feedback:</p>
-              <p>
-                Collect community feedback on initial designs and ideas for the
-                rug check tool, ensuring development aligns with user needs.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PHASE 2 -->
-      <img src="img/dogdetective-phase-two.jpg" alt="Phase Two" />
-      <div class="roadmap-container">
-        <div class="roadmap-wrapper">
-          <h3>Phase 2: Essential Tools &amp; Early Launch (2025 Q1)</h3>
-          <div class="what-info-block moonshot-info-block roadmap-info-block">
-            <div class="what-text-block">
-              <p class="p-heading in-progress">
-                Early Launch of SHERDOG Rug Check Tool:
-              </p>
-              <p>
-                Release a simplified version of the rug check tool on Solana,
-                exclusively for $SHERDOG holders, including:
-              </p>
-              <ul class="roadmap-list-block">
-                <li>
-                  <span>Basic Wallet Monitoring:</span>
-                  View recent transaction history and detect large transfers or
-                  interactions with flagged addresses.
-                </li>
-                <li>
-                  <span>Smart Contract Overview (Basic):</span>
-                  Quick scans to highlight common red flags in smart contracts,
-                  such as high fees or missing liquidity locks.
-                </li>
-                <li>
-                  <span>Initial Scam Alert Integration:</span>
-                  Receive warnings if monitored wallets or tokens are linked to
-                  known suspicious addresses.
-                </li>
-              </ul>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Golden Checkmark on Twitter:</p>
-              <p>
-                Upgrade to the golden checkmark on Twitter, enhancing SHERDOG's
-                credibility and ensuring users can easily identify the official
-                SHERDOG account.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading ready">SHERDOG Wallet Tracking Telegram Bot:</p>
-              <ul class="roadmap-list-block">
-                <li>
-                  <span>Real-Time Wallet Alerts:</span>
-                  Track wallets and receive immediate notifications for
-                  significant transactions or suspicious behavior.
-                </li>
-                <li>
-                  <span>Easy Setup &amp; Custom Alerts:</span>
-                  Users can configure the bot to get alerts on specific types of
-                  transactions or activities.
-                </li>
-                <li>
-                  <span>Scam Warnings:</span>
-                  The bot integrates with scam alert data, providing users with
-                  real-time protection.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PHASE 3 -->
-      <img src="img/dogdetective-phase-three.jpg" alt="Phase Three" />
-      <div class="roadmap-container">
-        <div class="roadmap-wrapper">
-          <h3>Phase 3: Essential Tools &amp; Early Launch (2025 Q1)</h3>
-          <div class="what-info-block moonshot-info-block roadmap-info-block">
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Launch of SHERDOG Rug Check Tool:</p>
-              <p>
-                Make the tool accessible to all users, expanding beyond the
-                exclusive early access for $SHERDOG holders.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Detailed Token Health Dashboard:</p>
-              <p>
-                Display comprehensive metrics like liquidity depth, trading
-                volume trends, and token holder concentration, allowing users to
-                assess the stability and risks of tokens.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Multi-Source Scam Detection:</p>
-              <p>
-                Integrate additional data feeds, including machine learning
-                models and expanded scam databases, for more accurate scam
-                alerts.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">
-                Advanced Wallet Tracking &amp; Monitoring:
-              </p>
-              <ul class="roadmap-list-block">
-                <li>
-                  <span>Multi-Wallet Monitoring:</span>
-                  Track multiple wallets at once and group them for easier
-                  management.
-                </li>
-                <li>
-                  <span>Suspicious Behavior Alerts:</span>
-                  Detect patterns like wash trading, sudden large-scale
-                  transfers, or interactions with new tokens. Users receive
-                  warnings when tracked wallets exhibit these behaviors.
-                </li>
-                <li>
-                  <span>Wallet Activity Reports:</span>
-                  Receive daily or weekly summaries of wallet activity,
-                  including major transfers and token interactions.
-                </li>
-                <li>
-                  <span>Transaction Tracking</span>
-                  Visualize transaction flows, helping users track potential
-                  laundering routes or connections between addresses.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PHASE 4 -->
-      <img src="img/dogdetective-phase-four.jpg" alt="Phase Four" />
-      <div class="roadmap-container">
-        <div class="roadmap-wrapper">
-          <h3>Phase 4: Comprehensive Rug Check Tool Expansion (2025 Q3)</h3>
-          <div class="what-info-block moonshot-info-block roadmap-info-block">
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Advanced Smart Contract Analysis:</p>
-              <p>
-                Perform deep contract audits, flagging vulnerabilities like
-                hidden mint functions, transfer freezes, or stealth taxes. Users
-                can view detailed contract breakdowns and warnings.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Price Manipulation Detection:</p>
-              <p>
-                Identify abnormal trading patterns, including sudden price spikes
-                followed by massive sell-offs. Users will receive alerts for
-                tokens showing suspicious behavior.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Project Credibility Index:</p>
-              <p>
-                Develop a scoring system that rates projects based on metrics
-                such as contract safety, team transparency, and liquidity
-                stability. Each token will have a credibility score for easier
-                assessment.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">Cross-Chain Scam Detection:</p>
-              <p>
-                Expand functionality to support multiple blockchains, including
-                Ethereum, Binance Smart Chain, and others. Users can monitor
-                projects across several networks from one platform.
-              </p>
-            </div>
-            <div class="what-text-block">
-              <p class="p-heading in-progress">AI-Driven Token Behavior Analysis:</p>
-              <p>
-                Analyze liquidity pools to detect sudden withdrawals, price
-                manipulation, or other risky behaviors. Users can set up alerts
-                for significant changes.
-              </p>
-            </div>
-          </div>
-          <p class="roadmap-note">
-            Note: The roadmap is subject to change, and each phase will only
-            progress once all goals in the previous phase are achieved.
-          </p>
-        </div>
-      </div>
-      <img src="img/dogdetective-roadmap-win.jpg" alt="Roadmap Win" />
-
-      <footer>
-        <div class="footer-container">
-          <div class="footer-wrapper">
-            <div class="footer-info">
-              <p>
-                SHERDOG is not associated with any official Sherlock Holmes
-                brand or DC Comics. While our SHERDOG design draws inspiration
-                from detective archetypes, it does not use any copyrighted
-                elements.
-              </p>
-              <p>
-                This website does not constitute an offer to purchase or
-                solicitation to sell, nor is it a recommendation to buy or sell,
-                any token or other product. Purchasing and selling tokens is
-                inherently risky, and holders must bear the risk of loss.
-              </p>
-              <p>
-                Neither the authors of this website nor any participants in the
-                sherdog.meme project accept any liability for losses or taxes
-                that holders, purchasers, or sellers of $SHERDOG may incur.
-                Consult your local laws before transacting in any cryptocurrency.
-              </p>
-            </div>
-          </div>
-          <div class="copyright-bar">
-            <p>Copyright &#169; 2024 sherdog.meme</p>
-            <div class="social-icons-footer">
-              <!-- Repeat your social icons here -->
-              <a href="#" target="_blank">
-                <svg><!-- ... --></svg>
-              </a>
-              <a href="https://t.me/sherdogportal" target="_blank">
-                <svg><!-- ... --></svg>
-              </a>
-              <a href="https://x.com/sherdogcoin" target="_blank">
-                <svg><!-- ... --></svg>
-              </a>
-              <a href="https://www.dextools.io/app/..." target="_blank">
-                <svg><!-- ... --></svg>
-              </a>
-            </div>
-          </div>
-        </div>
-        <img src="img/dogdetective-city-view.jpg" alt="dog detective city view" />
-      </footer>
-    </div>
-
-    <!-- Copy to clipboard script -->
-    <script>
-      document.querySelectorAll(".copy-icon").forEach((copyIcon, index) => {
-        copyIcon.addEventListener("click", function () {
-          const textArea = document.querySelectorAll(".full-ca")[index];
-
-          textArea.select();
-
-          try {
-            const successful = document.execCommand("copy");
-
-            if (successful) {
-              showTooltip(copyIcon, "CA Copied!");
-            }
-          } catch (err) {
-            console.error("Unable to copy", err);
-          }
-
-          textArea.setSelectionRange(0, 0);
-        });
-      });
-
-      function showTooltip(element, message) {
-        const tooltip = document.createElement("span");
-        tooltip.className = "tooltip";
-        tooltip.textContent = message;
-
-        element.parentElement.appendChild(tooltip);
-
-        setTimeout(() => tooltip.classList.add("show"), 10);
-
-        setTimeout(() => {
-          tooltip.classList.remove("show");
-          tooltip.remove();
-        }, 3000);
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Solana Rug Checker</title>
+  <style>
+    body {
+      margin: 0; 
+      padding: 0; 
+      background-color: #0f0f0f; 
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    /* Container for top panels */
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      padding: 0 1rem;
+    }
+    .left-panel, .right-panel {
+      background: #151515;
+      border-radius: 8px;
+      padding: 1.5rem;
+      flex: 1 1 300px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    /* Search Bar */
+    .search-bar {
+      max-width: 1200px;
+      margin: 2rem auto 1rem;
+      display: flex; 
+      gap: 1rem; 
+      padding: 0 1rem;
+    }
+    .search-bar input {
+      flex: 1; 
+      padding: 0.75rem; 
+      font-size: 1rem; 
+      border-radius: 6px;
+      border: 1px solid #333; 
+      background-color: #1c1c1c; 
+      color: #fff;
+    }
+    .search-bar button {
+      padding: 0.75rem 1.5rem; 
+      border: none; 
+      border-radius: 6px;
+      background-color: #28a745; 
+      color: #fff; 
+      font-size: 1rem;
+      cursor: pointer; 
+      transition: background 0.3s;
+    }
+    .search-bar button:hover {
+      background-color: #218838;
+    }
+    /* Left Panel (Token Info) */
+    .token-header {
+      display: flex; 
+      align-items: center; 
+      gap: 1rem; 
+      margin-bottom: 1rem;
+    }
+    .token-logo {
+      width: 48px; 
+      height: 48px; 
+      border-radius: 50%; 
+      background: #333; 
+      object-fit: cover;
+    }
+    .token-title {
+      font-size: 1.5rem; 
+      margin: 0;
+      color: #28a745;
+    }
+    .token-info p {
+      margin: 0.5rem 0;
+    }
+    .secure-label {
+      color: #28a745;
+      font-weight: bold;
+    }
+    .insecure-label {
+      color: #dc3545;
+      font-weight: bold;
+    }
+    /* Right Panel (Analysis) */
+    .right-panel h2 {
+      color: #28a745;
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+    .analysis-score {
+      display: flex; 
+      align-items: center; 
+      gap: 1rem; 
+      margin-bottom: 1.5rem;
+    }
+    .analysis-circle {
+      width: 80px; 
+      height: 80px; 
+      border-radius: 50%;
+      background: #333; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-size: 1.5rem; 
+      font-weight: bold;
+    }
+    .analysis-label {
+      font-size: 1.2rem; 
+      font-weight: bold;
+    }
+    .analysis-sub {
+      color: #ccc;
+    }
+    .risk-factors h3 {
+      margin: 0.5rem 0;
+    }
+    .risk-circles {
+      display: flex; 
+      gap: 0.5rem; 
+      margin-top: 0.5rem;
+    }
+    .risk-circle {
+      width: 30px; 
+      height: 30px; 
+      border-radius: 50%;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-weight: bold; 
+      color: #000;
+    }
+    .risk-circle.green {
+      background: #28a745;
+    }
+    .risk-circle.yellow {
+      background: #ffc107;
+    }
+    .risk-circle.red {
+      background: #dc3545;
+    }
+    /* Bottom Container for Markets & Top Holders */
+    .bottom-container {
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      padding: 0 1rem;
+    }
+    .markets-panel, .holders-panel {
+      background: #151515;
+      border-radius: 8px;
+      padding: 1.5rem;
+      flex: 1 1 300px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.5rem;
+      border-bottom: 1px solid #333;
+    }
+    th {
+      color: #28a745;
+      font-weight: bold;
+    }
+    td {
+      color: #ccc;
+    }
+    /* Updated Markets table header to include Price */
+    .markets-panel table th.price {
+      text-align: right;
+    }
+    .markets-panel table td.price {
+      text-align: right;
+    }
+    /* Responsive */
+    @media(max-width: 800px) {
+      .analysis-score {
+        flex-direction: column; 
+        align-items: flex-start;
       }
-    </script>
-  </body>
+      .container, .bottom-container {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Search Bar -->
+<div class="search-bar">
+  <input id="tokenAddress" type="text" placeholder="Enter token address" />
+  <button onclick="rugCheck()">Rug Check</button>
+</div>
+
+<!-- Top Panels Container -->
+<div class="container">
+  <!-- Left Panel: Token Info -->
+  <div class="left-panel">
+    <div class="token-header">
+      <img id="tokenLogo" class="token-logo" src="" alt="Token Logo">
+      <h2 id="tokenName" class="token-title">Unknown</h2>
+    </div>
+    <div class="token-info">
+      <p><strong>Token Address:</strong> <span id="tokenAddr">--</span></p>
+      <p><strong>Supply:</strong> <span id="tokenSupply">--</span></p>
+      <p><strong>Mint Authority:</strong> <span id="mintAuth">--</span></p>
+      <p><strong>Freeze Authority:</strong> <span id="freezeAuth">--</span></p>
+      <p><strong>Social Links:</strong> <span id="socialLinks">No info found</span></p>
+    </div>
+  </div>
+
+  <!-- Right Panel: Analysis -->
+  <div class="right-panel">
+    <h2>Token Safety Analysis</h2>
+    <div class="analysis-score">
+      <div class="analysis-circle" id="scoreCircle">--</div>
+      <div>
+        <div class="analysis-label" id="safetyStatus">Unknown</div>
+        <div class="analysis-sub" id="scoreLabel">Safety Score: -- / 100</div>
+      </div>
+    </div>
+    <div class="risk-factors">
+      <h3>Risk Factor Count:</h3>
+      <div class="risk-circles">
+        <div class="risk-circle green" id="riskLow">0</div>
+        <div class="risk-circle yellow" id="riskMed">0</div>
+        <div class="risk-circle red" id="riskHigh">0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Container: Markets & Top Holders -->
+<div class="bottom-container">
+  <!-- Markets Panel (Now using Dexscreener API) -->
+  <div class="markets-panel">
+    <h2>Markets</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Market</th>
+          <th>Address</th>
+          <th>Pair</th>
+          <th>LP Mint</th>
+          <th>Liquidity</th>
+          <th class="price">Price (USDC)</th>
+        </tr>
+      </thead>
+      <tbody id="marketsBody">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Top Holders Panel -->
+  <div class="holders-panel">
+    <h2>Top Holders</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Amount</th>
+          <th>Percentage</th>
+        </tr>
+      </thead>
+      <tbody id="holdersBody">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Pull in Solana Web3.js library -->
+<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+<script>
+  // Your Helius RPC Endpoint
+  const RPC_ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=f7f694d9-993a-46ba-adbf-3e1ec4f29416";
+  // USDC Mint on Solana for reference (to get price in USDC)
+  const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt";
+  // Token Program ID
+  const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+
+  let tokenList = [];
+  let tokenListLoaded = false;
+  let connection;
+
+  // Load token list on page load
+  window.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const res = await fetch("https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json");
+      const data = await res.json();
+      tokenList = data.tokens || [];
+      tokenListLoaded = true;
+      console.log("Token list loaded. Count:", tokenList.length);
+    } catch (err) {
+      console.error("Error loading token list:", err);
+    }
+    // For now, clear markets table; it will be populated after rug check if real data is fetched.
+    document.getElementById("marketsBody").innerHTML = "";
+  });
+
+  async function rugCheck() {
+    if (!tokenListLoaded) {
+      alert("Still loading the token list. Please wait a moment and try again!");
+      return;
+    }
+    const inputAddr = document.getElementById('tokenAddress').value.trim();
+    if (!inputAddr) {
+      alert("Please enter a token address!");
+      return;
+    }
+    let publicKey;
+    try {
+      publicKey = new solanaWeb3.PublicKey(inputAddr);
+    } catch (err) {
+      alert("Invalid Solana address!");
+      return;
+    }
+    const fullAddress = publicKey.toBase58();
+    resetUI(fullAddress);
+    connection = new solanaWeb3.Connection(RPC_ENDPOINT);
+
+    try {
+      // Look up token info from the token list
+      const tokenEntry = tokenList.find(t => t.address === fullAddress);
+      if (tokenEntry) {
+        document.getElementById("tokenName").textContent = tokenEntry.name || "Unknown";
+        document.getElementById("tokenLogo").src = tokenEntry.logoURI || "https://via.placeholder.com/48/333/fff?text=No+Logo";
+        if (tokenEntry.extensions) {
+          const ex = tokenEntry.extensions;
+          let links = [];
+          if (ex.website) links.push(`<a href="${ex.website}" target="_blank">Website</a>`);
+          if (ex.twitter) {
+            const twitterHandle = ex.twitter.replace('@','');
+            links.push(`<a href="https://twitter.com/${twitterHandle}" target="_blank">Twitter</a>`);
+          }
+          if (ex.discord) links.push(`<a href="${ex.discord}" target="_blank">Discord</a>`);
+          if (ex.telegram) links.push(`<a href="${ex.telegram}" target="_blank">Telegram</a>`);
+          document.getElementById("socialLinks").innerHTML = links.length ? links.join(" | ") : "No info found";
+        }
+      } else {
+        document.getElementById("tokenName").textContent = "Unknown";
+        document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+      }
+
+      // Fetch on-chain token info
+      const parsedInfo = await connection.getParsedAccountInfo(publicKey);
+      let isMint = false;
+      let isTokenAccount = false;
+      let supply = "--";
+      let mintAuth = "None";
+      let freezeAuth = "None";
+      let decimals = 0;
+      if (parsedInfo.value && parsedInfo.value.data && parsedInfo.value.data.parsed) {
+        const info = parsedInfo.value.data.parsed.info;
+        const type = parsedInfo.value.data.parsed.type;
+        if (type === "mint") {
+          isMint = true;
+          supply = info.supply;
+          mintAuth = info.mintAuthority || "None";
+          freezeAuth = info.freezeAuthority || "None";
+          decimals = info.decimals;
+        } else if (type === "account") {
+          isTokenAccount = true;
+          mintAuth = "(See Mint)";
+          freezeAuth = "(See Mint)";
+        }
+      } else {
+        const rawInfo = await connection.getAccountInfo(publicKey);
+        if (!rawInfo) {
+          console.log("No data found for", fullAddress);
+        }
+      }
+      if (isMint) {
+        const tokenSupply = await connection.getTokenSupply(publicKey);
+        if (tokenSupply.value) {
+          supply = tokenSupply.value.amount;
+        }
+      }
+
+      // Update left panel
+      document.getElementById("tokenAddr").textContent = shortenAddress(fullAddress);
+      document.getElementById("tokenAddr").title = fullAddress;
+      document.getElementById("tokenSupply").textContent = formatNumber(supply);
+      document.getElementById("mintAuth").textContent = (mintAuth === "None") ? "Secure" : "Insecure";
+      document.getElementById("mintAuth").className = (mintAuth === "None") ? "secure-label" : "insecure-label";
+      document.getElementById("freezeAuth").textContent = (freezeAuth === "None") ? "Secure" : "Insecure";
+      document.getElementById("freezeAuth").className = (freezeAuth === "None") ? "secure-label" : "insecure-label";
+
+      const { score, statusLabel, lowCount, medCount, highCount } = computeScoreAndRisk({
+        isMint, isTokenAccount, supply, mintAuth, freezeAuth
+      });
+      document.getElementById("scoreCircle").textContent = score;
+      document.getElementById("scoreLabel").textContent = `Safety Score: ${score} / 100`;
+      document.getElementById("safetyStatus").textContent = statusLabel;
+      document.getElementById("riskLow").textContent = lowCount;
+      document.getElementById("riskMed").textContent = medCount;
+      document.getElementById("riskHigh").textContent = highCount;
+
+      // If it's a mint, fetch market data from Dexscreener and top holders
+      if (isMint && decimals) {
+        const dexscreenerData = await fetchDexscreenerData(fullAddress);
+        if (dexscreenerData && dexscreenerData.pairs && dexscreenerData.pairs.length > 0) {
+          // Map Dexscreener pairs to our table format
+          const markets = dexscreenerData.pairs.map(pair => {
+            // Use baseToken and targetToken symbols to build pair info
+            const pairStr = pair.baseToken && pair.targetToken
+              ? `${pair.baseToken.symbol}/${pair.targetToken.symbol}`
+              : "N/A";
+            return {
+              market: pair.market || "Dex",
+              address: pair.address || "N/A",
+              pair: pairStr,
+              lpMint: pair.lpMint || "N/A",
+              liquidity: pair.liquidity ? "$" + pair.liquidity.toLocaleString() : "N/A",
+              price: pair.priceUsd || "N/A"
+            };
+          });
+          populateMarketsTable(markets);
+        } else {
+          populateMarketsTable([]);
+        }
+        // Fetch top holders data on-chain
+        const topHolders = await fetchTopHolders(connection, fullAddress);
+        populateHoldersTable(topHolders);
+      } else {
+        document.getElementById("marketsBody").innerHTML = "";
+        document.getElementById("holdersBody").innerHTML = "";
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching token info. Check console.");
+    }
+  }
+
+  // Fetch Dexscreener data for a given mint address
+  async function fetchDexscreenerData(mintAddress) {
+    const url = `https://api.dexscreener.com/latest/dex/tokens/solana/${mintAddress}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error("Error fetching Dexscreener data:", err);
+      return null;
+    }
+  }
+
+  // Top Holders: Fetch top 5 holders for a given mint
+  async function fetchTopHolders(conn, mintAddress) {
+    const mintPubKey = new solanaWeb3.PublicKey(mintAddress);
+    const accounts = await conn.getParsedProgramAccounts(TOKEN_PROGRAM_ID, {
+      filters: [
+        { dataSize: 165 },
+        { memcmp: { offset: 0, bytes: mintPubKey.toBase58() } }
+      ]
+    });
+    const holders = accounts.map(({ account }) => {
+      const info = account.data.parsed.info;
+      const owner = info.owner;
+      const amount = info.tokenAmount.uiAmount;
+      return { owner, amount };
+    });
+    holders.sort((a, b) => b.amount - a.amount);
+    const total = holders.reduce((sum, h) => sum + h.amount, 0);
+    const top5 = holders.slice(0, 5).map(h => ({
+      ...h,
+      percentage: total > 0 ? ((h.amount / total) * 100).toFixed(2) + "%" : "0%"
+    }));
+    return top5;
+  }
+
+  function populateHoldersTable(topHolders) {
+    const holdersBody = document.getElementById("holdersBody");
+    holdersBody.innerHTML = "";
+    topHolders.forEach(h => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${shortenAddress(h.owner)}</td>
+        <td>${formatNumber(h.amount.toString())}</td>
+        <td>${h.percentage}</td>
+      `;
+      holdersBody.appendChild(row);
+    });
+  }
+
+  function populateMarketsTable(markets) {
+    const marketsBody = document.getElementById("marketsBody");
+    marketsBody.innerHTML = "";
+    if (markets.length === 0) {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td colspan="6" style="text-align:center;">No market data available</td>`;
+      marketsBody.appendChild(row);
+      return;
+    }
+    markets.forEach(m => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${m.market}</td>
+        <td>${m.address}</td>
+        <td>${m.pair}</td>
+        <td>${m.lpMint}</td>
+        <td>${m.liquidity}</td>
+        <td class="price">${m.price}</td>
+      `;
+      marketsBody.appendChild(row);
+    });
+  }
+
+  // Placeholder scoring logic
+  function computeScoreAndRisk({ isMint, isTokenAccount, supply, mintAuth, freezeAuth }) {
+    let score = 50;
+    let statusLabel = "Medium Risk";
+    let lowCount = 0, medCount = 0, highCount = 0;
+    if (isMint) {
+      if (mintAuth === "None") {
+        score += 30; 
+        lowCount += 1;
+      } else {
+        score -= 20;
+        highCount += 1;
+      }
+      if (freezeAuth === "None") {
+        score += 10;
+        lowCount += 1;
+      } else {
+        score -= 10;
+        medCount += 1;
+      }
+    } else if (isTokenAccount) {
+      score -= 5;
+      medCount += 1;
+    } else {
+      score -= 10;
+      highCount += 1;
+    }
+    const numSupply = parseFloat(supply);
+    if (!isNaN(numSupply)) {
+      if (numSupply > 1000000000) {
+        score -= 10;
+        medCount += 1;
+      } else {
+        score += 5;
+        lowCount += 1;
+      }
+    }
+    if (score < 0) score = 0;
+    if (score > 100) score = 100;
+    if (score >= 80) {
+      statusLabel = "Safe";
+    } else if (score < 50) {
+      statusLabel = "High Risk";
+    }
+    return { score, statusLabel, lowCount, medCount, highCount };
+  }
+
+  function resetUI(fullAddress) {
+    document.getElementById("tokenName").textContent = "Unknown";
+    document.getElementById("tokenLogo").src = "https://via.placeholder.com/48/333/fff?text=No+Logo";
+    document.getElementById("tokenAddr").textContent = shortenAddress(fullAddress);
+    document.getElementById("tokenAddr").title = fullAddress;
+    document.getElementById("tokenSupply").textContent = "--";
+    document.getElementById("mintAuth").textContent = "--";
+    document.getElementById("freezeAuth").textContent = "--";
+    document.getElementById("mintAuth").className = "";
+    document.getElementById("freezeAuth").className = "";
+    document.getElementById("socialLinks").textContent = "No info found";
+    document.getElementById("scoreCircle").textContent = "--";
+    document.getElementById("scoreLabel").textContent = "Safety Score: -- / 100";
+    document.getElementById("safetyStatus").textContent = "Unknown";
+    document.getElementById("riskLow").textContent = "0";
+    document.getElementById("riskMed").textContent = "0";
+    document.getElementById("riskHigh").textContent = "0";
+    document.getElementById("holdersBody").innerHTML = "";
+    document.getElementById("marketsBody").innerHTML = "";
+  }
+
+  function shortenAddress(addr) {
+    if (addr.length <= 8) return addr;
+    return addr.slice(0,4) + "..." + addr.slice(-4);
+  }
+
+  function formatNumber(numStr) {
+    if (numStr === "--") return "--";
+    const n = parseFloat(numStr);
+    if (isNaN(n)) return numStr;
+    return n.toLocaleString();
+  }
+</script>
+</body>
 </html>
